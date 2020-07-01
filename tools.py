@@ -21,3 +21,11 @@ SHOW_INFO = False
 def show(*arg):
     if SHOW_INFO:
         print(*arg)
+
+SHOW_WARNING = True
+def warning(*arg):
+    if SHOW_WARNING:
+        print(colors.WARNING, *arg, colors.ENDC)
+
+def error(*arg):
+    print(colors.FAIL, *arg, colors.ENDC)

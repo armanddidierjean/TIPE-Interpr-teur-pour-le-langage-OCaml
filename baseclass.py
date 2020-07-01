@@ -65,6 +65,8 @@ class MemoryTable(object):
     
     def get_value(self, id):
         return self.memoryTable[id].value
+    def get_type(self, id):
+        return self.memoryTable[id].type
     """
     def reassigne(self, id, type=None, value=None):
         if not id in self.memoryTable:

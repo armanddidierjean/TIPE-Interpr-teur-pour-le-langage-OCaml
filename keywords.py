@@ -44,6 +44,7 @@ DONE = 'DONE'
 ############### Types ###############
 INT = 'INT'
 FLOAT = 'FLOAT'
+BOOL = 'BOOL'
 
 ############### RESERVED KEYWORDS ###############
 RESERVED_KEYWORDS = {
