@@ -189,5 +189,13 @@ class Lexer:
         if current_char == '!':
             self.advance()
             return Token(EXCLAMATION, '!')
+        
+        if self.peek(2) == '&&':
+            self.advance(2)
+            return Token(BOOLEANCONJUNCTION, '&&')
+        
+        if self.peek(2) == '||':
+            self.advance(2)
+            return Token(BOOLEANDISJUNCTION, '||')
 
         raise SyntaxError("Invalid charactere")

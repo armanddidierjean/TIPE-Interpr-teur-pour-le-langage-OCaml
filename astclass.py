@@ -168,3 +168,6 @@ class Boucle(AST):
     def __init__(self, boolean_node, block_node):
         self.boolean_node = boolean_node
         self.block_node = block_node
+
+class UnitNode(AST):
+    pass

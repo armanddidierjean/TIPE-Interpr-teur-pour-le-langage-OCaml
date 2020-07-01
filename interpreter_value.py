@@ -151,3 +151,6 @@ class InterpreterValue(NodeVisitor):
         while self.visit(node.boolean_node):
             # TODO: warning if the type is not None
             self.visit(node.block_node)
+    
+    def visit_UnitNode(self, node):
+        return None

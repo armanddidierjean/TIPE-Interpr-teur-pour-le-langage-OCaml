@@ -53,20 +53,122 @@ class Parser:
             node = self.block()
         self.eat(SEMI)
         self.eat(SEMI)
-
-        #if self.lexer.current_token.type == LET:
-        #    node = self.let_statement()
-        #else:
-        #    node = self.sequence()
-        
         return Program(node)
     
     def block(self):
         """
-          sequence -> BEGIN
-        | command
+          LPAREN block? RPAREN
+        | pres0
+
+        USED FOR A BINOP
         """
         log("Block")
+        if self.current_token.type == LPAREN:
+            self.eat(LPAREN)
+            """LPAREN RPAREN"""
+            if self.current_token.type == RPAREN:
+                return UnitNode()
+            """LPAREN block RPAREN"""
+            node = self.block()
+            self.eat(RPAREN)
+            return node
+        else:
+            return self.pres0()
+
+    def pres0(self):
+        """
+          PLUS block
+        | MINUS block
+        | pres1 ((PLUS | MINUS) pres1)*
+
+        USED FOR A BINOP OR A UNARYOP
+        """
+        log("Pres0")
+
+        """PLUS block | MINUS block"""
+        if self.current_token in (PLUS_INT, MINUS_INT):
+            op_token = self.current_token
+            self.eat(self.current_token.type)
+            return UnaryOp(op_token, self.pres1())
+        else:
+            """code ((PLUS | MINUS) code)*"""
+            node = self.pres1()
+            while self.current_token.type in (PLUS_INT, MINUS_INT):
+                op_token = self.current_token
+                self.eat(self.current_token.type)
+                node = BinOp(node, op_token, self.pres1())
+            return node
+
+    def pres1(self):
+        """
+        pres2 (MOD pres2)*
+
+        USED FOR A BINOP
+        """
+        log("Pres1")
+        node = self.pres2()
+
+        while self.current_token.type in (MOD):
+            op_token = self.current_token
+            self.eat(self.current_token.type)
+            node = BinOp(node, op_token, self.pres2())
+        
+        return node
+
+    def pres2(self):
+        """
+        pres3 (MUL pres3)*
+
+        USED FOR A BINOP
+        """
+        log("Pres2")
+        node = self.pres3()
+
+        while self.current_token.type in (MUL_INT):
+            op_token = self.current_token
+            self.eat(self.current_token.type)
+            node = BinOp(node, op_token, self.pres3())
+        
+        return node
+
+    def pres3(self):
+        """
+        pres4 (EQUAL | DIFFERENT) pres4
+
+        USED FOR A BINOP
+        """
+        log("Pres3")
+        node = self.pres4()
+
+        while self.current_token.type in (EQUALS, DIFFERENT):
+            op_token = self.current_token
+            self.eat(self.current_token.type)
+            node = BinOp(node, op_token, self.pres4())
+        
+        return node
+
+    def pres4(self):
+        """
+        code ((BOOLEANCONJUNCTION | BOOLEANDISJUNCTION) code)*
+
+        USED FOR A BINOP
+        """
+        log("pres4")
+        node = self.code()
+
+        while self.current_token.type in (BOOLEANCONJUNCTION, BOOLEANDISJUNCTION):
+            op_token = self.current_token
+            self.eat(self.current_token.type)
+            node = BinOp(node, op_token, self.code())
+        
+        return node
+    
+    def code(self):
+        """
+          sequence      -> (BEGIN)
+        | command
+        """
+        log("Code")
         if self.current_token.type == BEGIN:
             node = self.sequence()
         else:
@@ -76,11 +178,18 @@ class Parser:
 
     def sequence(self):
         """
+        BEGIN END
         BEGIN block (SEMI block)* END
         """
         log("Sequence")
         self.eat(BEGIN)
         
+        """BEGIN END"""
+        if self.current_token.type == END:
+            self.eat(END)
+            return UnitNode()
+        
+        """BEGIN block (SEMI block)* END"""
         blocks_list = [self.block()]
 
         while self.current_token.type == SEMI:
@@ -93,59 +202,17 @@ class Parser:
 
     def command(self):
         """
-        expr (PLUS block)?
+          INT 
+        | FLOAT
+        | PRINT_INT block
+        | WHILE block DO block DONE
+        | assignement_statement ->(LET)
+        | variable_statement
 
-        NE RENVOIT PAS DE NODE PROPRE
-        -> return expr()
-        -> return BinOp(expr, op, block)
+        DO NOT RETURN HIS OWN NODE
         """
         log("Command")
-        expr_node = self.expr()
-
-        if self.current_token.type == PLUS_INT:
-            op_token = self.current_token
-            self.eat(PLUS_INT)
-            block_node = self.block()
-            return BinOp(expr_node, op_token, block_node)
-        else:
-            return expr_node
-    
-    def expr(self):
-        """
-        factor (MUL block)?
-
-        NE RENVOIT PAS DE NODE PROPRE
-        -> return expr()
-        -> return BinOp(expr, op, block)
-        """
-        log("Expr")
-        factor_node = self.factor()
-
-        if self.current_token.type == MUL_INT:
-            op_token = self.current_token
-            self.eat(MUL_INT)
-            block_node = self.block()
-            return BinOp(factor_node, op_token, block_node)
-        else:
-            return factor_node
-
-    def factor(self):
-        """
-        PLUS block
-        MINUS block
-        INT
-        WHILE block (EQUAL | DIFFERENT) block DO block DONE
-        assignement_statement -> LET
-        variable_statement
-
-        NE RENVOIT PAS DE NODE PROPRE
-        """
-        log("Factor")
-        if self.current_token.type in (PLUS_INT, MINUS_INT):
-            op_token = self.current_token
-            self.eat(self.current_token.type)
-            return UnaryOp(op_token, self.block())
-        elif self.current_token.type in (INT, FLOAT):
+        if self.current_token.type in (INT, FLOAT):
             node = Num(self.current_token.value, self.current_token.type)
             self.eat(self.current_token.type)
             return node
@@ -153,14 +220,7 @@ class Parser:
             return self.assignement_statement()
         elif self.current_token.type == WHILE:
             self.eat(WHILE)
-            left_block = self.block()
-            op_token = self.current_token
-            if self.current_token.type == EQUALS:
-                self.eat(EQUALS)
-            else:
-                self.eat(DIFFERENT)
-            right_block = self.block()
-            boolean_node = BinOp(left_block, op_token, right_block)
+            boolean_node = self.block()
             self.eat(DO)
             block_node = self.block()
             self.eat(DONE)
@@ -172,13 +232,10 @@ class Parser:
         else:
             return self.variable_statement()
 
-        #TODO: romve:
-        print(colors.WARNING, "ERROR parser:factor did not got an expencted token : ", self.current_token, colors.ENDC)
-
     def assignement_statement(self):
         """
         LET assignement (AND assignement)* IN block
-        ~~LET assignement (AND assignement)*~~
+        LET assignement (AND assignement)*
 
         Return let_statement node
         """
@@ -195,8 +252,8 @@ class Parser:
             self.eat(IN)
             block = self.block()
         else:
-            print(colors.WARNING, "WARNING: parser:assignement_statement global variable are not implemented", colors.ENDC)
-            block = None
+            print(colors.WARNING, "WARNING: parser:assignement_statement global variable are not implemented, using a UnitNode", colors.ENDC)
+            block = UnitNode()
         
         return AssignementStatement(assignements_list, block)
     

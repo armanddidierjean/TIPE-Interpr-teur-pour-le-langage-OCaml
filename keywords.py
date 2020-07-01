@@ -18,17 +18,23 @@ MUL_INT = 'MUL_INT'
 MUL_FLOAT = 'MUL_FLOAT'
 DIV_INT = 'DIV_INT'
 DIV_FLOAT = 'DIV_FLOAT'
+MOD = 'MOD'
+
+BOOLEANCONJUNCTION = 'BOOLEANCONJUNCTION'
+BOOLEANDISJUNCTION = 'BOOLEANDISJUNCTION'
+
+############### Functions ###############
+PRINT_INT = 'PRINT_INT'
 
 ############### Micelianous ###############
 LPAREN = 'LPAREN'
 RPAREN = 'RPAREN'
 SEMI = 'SEMI'
 EQUALS = 'EQUAlS'
+DIFFERENT = 'DIFFERENT'
 REASSIGN = 'REASSIGN'
 DOT = 'DOT'
 EXCLAMATION = 'EXCLAMATION'
-PRINT_INT = 'PRINT_INT'
-DIFFERENT = 'DIFFERENT'
 
 ############### OCAML keywords ###############
 LET = 'LET'
@@ -57,6 +63,7 @@ RESERVED_KEYWORDS = {
     'while': Token(WHILE, None),
     'do': Token(DO, None),
     'done': Token(DONE, None),
+    'mod': Token(MOD, None),
     'print_int': Token(PRINT_INT, None),
     #'print_string': Token(PRINT_STRING, None),
 }

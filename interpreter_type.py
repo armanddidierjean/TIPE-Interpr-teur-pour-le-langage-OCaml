@@ -171,3 +171,6 @@ class InterpreterType(NodeVisitor):
         if block_type != UNIT:
             warning(f"Block node is of type {block_type} instead of UNIT in Boucle")
         return UNIT
+    
+    def visit_UnitNode(self, node):
+        return UNIT
