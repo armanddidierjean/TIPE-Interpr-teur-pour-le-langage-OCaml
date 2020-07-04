@@ -2,6 +2,10 @@ from tools import *
 from keywords import *
 from baseclass import *
 
+"""
+File containing an interpreter that print the content of the AST node.
+"""
+
 #####################
 #    Interpreter    #
 #####################
@@ -133,8 +137,11 @@ class InterpreterShow(NodeVisitor):
     def visit_PrintInt(self, node):
         self.print_ind('PrintInt')
     
-    def visit_Boucle(self, node):
-        self.print_ind('Boucle')
+    def visit_PrintString(self, node):
+        self.print_ind('PreintString')
+    
+    def visit_Loop(self, node):
+        self.print_ind('Loop')
         self.print_ind('{')
         self.ind()
         self.print_ind('Boolean operation')

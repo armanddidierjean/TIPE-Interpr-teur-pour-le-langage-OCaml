@@ -88,6 +88,7 @@ class Parser:
         """PLUS block | MINUS block"""
         if self.current_token in (PLUS_INT, MINUS_INT):
             op_token = self.current_token
+            log("pres0 is eating a self type:", self.current_token)
             self.eat(self.current_token.type)
             return UnaryOp(op_token, self.pres1())
         else:
@@ -95,6 +96,7 @@ class Parser:
             node = self.pres1()
             while self.current_token.type in (PLUS_INT, MINUS_INT):
                 op_token = self.current_token
+                log("pres0 is eating a self type2:", self.current_token)
                 self.eat(self.current_token.type)
                 node = BinOp(node, op_token, self.pres1())
             return node
@@ -108,8 +110,9 @@ class Parser:
         log("Pres1")
         node = self.pres2()
 
-        while self.current_token.type in (MOD):
+        while self.current_token.type == MOD:
             op_token = self.current_token
+            log("pres1 is eating a self type:", self.current_token)
             self.eat(self.current_token.type)
             node = BinOp(node, op_token, self.pres2())
         
@@ -124,8 +127,9 @@ class Parser:
         log("Pres2")
         node = self.pres3()
 
-        while self.current_token.type in (MUL_INT):
+        while self.current_token.type == MUL_INT:
             op_token = self.current_token
+            log("pres2 is eating a self type:", self.current_token)
             self.eat(self.current_token.type)
             node = BinOp(node, op_token, self.pres3())
         
@@ -142,6 +146,7 @@ class Parser:
 
         while self.current_token.type in (EQUALS, DIFFERENT):
             op_token = self.current_token
+            log("pres3 is eating a self type:", self.current_token)
             self.eat(self.current_token.type)
             node = BinOp(node, op_token, self.pres4())
         
@@ -158,6 +163,7 @@ class Parser:
 
         while self.current_token.type in (BOOLEANCONJUNCTION, BOOLEANDISJUNCTION):
             op_token = self.current_token
+            log("pres4 is eating a self type:", self.current_token)
             self.eat(self.current_token.type)
             node = BinOp(node, op_token, self.code())
         
@@ -212,8 +218,9 @@ class Parser:
         DO NOT RETURN HIS OWN NODE
         """
         log("Command")
-        if self.current_token.type in (INT, FLOAT):
+        if self.current_token.type in (INT, FLOAT, STRING):
             node = Num(self.current_token.value, self.current_token.type)
+            log("Command is eating a self type (should be a num):", self.current_token)
             self.eat(self.current_token.type)
             return node
         elif self.current_token.type == LET:
@@ -224,11 +231,14 @@ class Parser:
             self.eat(DO)
             block_node = self.block()
             self.eat(DONE)
-            log(f"Returning a Boucle node boolean_node={boolean_node}, block_node={block_node}")
-            return Boucle(boolean_node, block_node)
+            log(f"Returning a Loop node boolean_node={boolean_node}, block_node={block_node}")
+            return Loop(boolean_node, block_node)
         elif self.current_token.type == PRINT_INT:
             self.eat(PRINT_INT)
-            return PrintInt(self.block()) 
+            return PrintInt(self.block())
+        elif self.current_token.type == PRINT_STRING:
+            self.eat(PRINT_STRING)
+            return PrintString(self.block()) 
         else:
             return self.variable_statement()
 
@@ -252,7 +262,7 @@ class Parser:
             self.eat(IN)
             block = self.block()
         else:
-            print(colors.WARNING, "WARNING: parser:assignement_statement global variable are not implemented, using a UnitNode", colors.ENDC)
+            show(colors.WARNING, "WARNING: parser:assignement_statement global variable are not implemented, using a UnitNode", colors.ENDC)
             block = UnitNode()
         
         return AssignementStatement(assignements_list, block)
@@ -276,7 +286,6 @@ class Parser:
             is_ref = False
         
         block_node = self.block()
-
         return Assignement(var_name, is_ref, block_node)
 
     def variable_statement(self):

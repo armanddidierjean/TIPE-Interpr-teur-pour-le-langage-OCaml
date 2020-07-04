@@ -3,6 +3,18 @@
 #####################
 
 class Token:
+    """
+    Token
+
+    Represent a base element of a program ('1', '+', 'print_int'...)
+
+    Attributes
+    ----------
+    type : keyword
+        Type of the token
+    value : VALUE (string, int...)
+        Value of the token (value, None or keyword)
+    """
     def __init__(self, type, value):
         self.type = type
         self.value = value
@@ -23,6 +35,14 @@ class Token:
 #   Nodes visitor   #
 #####################
 class NodeVisitor(object):
+    """
+    Base class used to construct an interpreter
+
+    Methods
+    -------
+    visit(node)
+        Call the visitType(node) methode corresponding to the node type
+    """
     def visit(self, node):
         method_name = 'visit_' + type(node).__name__
         visitor = getattr(self, method_name, self.generic_visit)
@@ -35,6 +55,20 @@ class NodeVisitor(object):
 #      Memory       #
 #####################
 class Symbol(object):
+    """
+    Represent a symbol, for the moment only a variable 
+
+    Attributes
+    ----------
+    id : string
+        Non duplicated id used to find the symbol
+    isref : bool
+        Is the symbol mutable
+    value : VALUE (string, int...)
+        Value of the symbol
+    type : PREDEFINED TYPE
+        Type of symbol
+    """
     def __init__(self, id, isref, value, type):
         self.id = id
         self.isref = isref
@@ -42,6 +76,35 @@ class Symbol(object):
         self.type = type
 
 class MemoryTable(object):
+    """
+    Class that manage a basic memory system. Is based on a Python dictionnary
+
+    WARNING: This class is a usable WIP
+    TODO: Improve the class
+
+    Methods
+    -------
+    define(id, isref, type=None, value=None)
+        define a new symbol in the memory
+        check if the id is already used
+    isdefined(id)
+        return True if id is in the memory
+    isref(id)
+        return True if the symbol id is mutable
+        WARNING: do not check if id is defined
+    change_value(id, value)
+        Change the value of the id symbol
+        WARNING: do not check if id is defined or mutable
+    get_value(id)
+        return the value of the symbol id
+        WARNING: do not check if id is defined
+    get_type(id)
+        return the type of the symbol id
+        WARNING: do not check if id is defined
+
+    TODO: remove or modify:
+    get_symbol(id, getref=False)
+    """
     def __init__(self):
         self.memoryTable = {}
     
@@ -65,6 +128,7 @@ class MemoryTable(object):
     
     def get_value(self, id):
         return self.memoryTable[id].value
+
     def get_type(self, id):
         return self.memoryTable[id].type
     """

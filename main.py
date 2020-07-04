@@ -8,14 +8,14 @@ from keywords import *
 from parser import *
 from lexer import *
 
-
-
 def test():
     tests_list = [
         # (id, code_string, type_res, value_res)
         (1, "1 + 2 * 2 + 2;;", INT, 7),
         (2, "let a = ref 0 in while !a <> 4 do begin print_int !a; a := !a + 1 end done;;", UNIT, None),
         (3, "let i = ref 1 and n = 10 in while !i <> n do begin print_int !i; i := !i + 1 end done;;", UNIT, None),
+        (4, "let a = ref 'Hello World!' in print_string !a;;", UNIT, None),
+        (5, 'begin print_string "4\\"" (* print 4" (* then nested comments should work*) *); "Hello" end;;', STRING, "Hello")
     ]
     # Liste des erreurs rencontrées
     eroors_list = []
@@ -23,6 +23,8 @@ def test():
         lexer = Lexer(texte)
         parser = Parser(lexer)
         node = parser.program()
+
+        print(" * Test", id)
 
         interpreter_type = InterpreterType(node)
         type_res = interpreter_type.interpret()
@@ -35,9 +37,13 @@ def test():
         if value_expected != value_res:
             eroors_list.append(f"Erreur got {value_res} instead of {value_expected} for test {id}")
     if len(eroors_list) == 0:
-        print(colors.OKGREEN, f"Tests: {len(tests_list)}/{len(tests_list)}", colors.ENDC)
+        print(colors.OKGREEN, "##############")
+        print(f" # Tests: {len(tests_list)}/{len(tests_list)} #")
+        print(" ##############", colors.ENDC)
     else:
-        print(colors.FAIL, f"Tests: {len(tests_list) - len(eroors_list)}/{len(tests_list)}", colors.ENDC)
+        print(colors.FAIL, "##############")
+        print(f" # Tests: {len(tests_list) - len(eroors_list)}/{len(tests_list)} #")
+        print(" ##############", colors.ENDC)
         error(*eroors_list)
 
 
@@ -64,9 +70,11 @@ let i = ref 1 and n = 10
 #typer = Typer(node)
 #typer.interpret()
 
-math = "1 + 2 * 2 + 2;;"
+#text = "'text';;"
 
-lexer = Lexer(math)
+text = "let a = ref 6 in 1;;"
+
+lexer = Lexer(text)
 parser = Parser(lexer)
 node = parser.program()
 

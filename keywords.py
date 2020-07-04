@@ -25,6 +25,7 @@ BOOLEANDISJUNCTION = 'BOOLEANDISJUNCTION'
 
 ############### Functions ###############
 PRINT_INT = 'PRINT_INT'
+PRINT_STRING = 'PRINT_STRING'
 
 ############### Micelianous ###############
 LPAREN = 'LPAREN'
@@ -51,6 +52,7 @@ DONE = 'DONE'
 INT = 'INT'
 FLOAT = 'FLOAT'
 BOOL = 'BOOL'
+STRING = 'STRING'
 
 ############### RESERVED KEYWORDS ###############
 RESERVED_KEYWORDS = {
@@ -65,5 +67,5 @@ RESERVED_KEYWORDS = {
     'done': Token(DONE, None),
     'mod': Token(MOD, None),
     'print_int': Token(PRINT_INT, None),
-    #'print_string': Token(PRINT_STRING, None),
+    'print_string': Token(PRINT_STRING, None),
 }

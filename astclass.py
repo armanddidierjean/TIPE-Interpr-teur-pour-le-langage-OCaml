@@ -1,6 +1,10 @@
 #####################
 #     AST  Nodes    #
 #####################
+"""
+File containing all class use to create the tree representing the program
+"""
+
 class AST:
     pass
 
@@ -10,7 +14,7 @@ class Program(AST):
 
     Attributes
     ----------
-    statement : AST node
+    block_node : AST node
         Program begining node
     """
     def __init__(self, block_node):
@@ -35,7 +39,7 @@ class Sequence(AST):
 
     Attributes
     ----------
-    commands_list : [AST]
+    commands_list : [AST node]
         List of the commands contained in the sequence
     """
     def __init__(self, commands_list):
@@ -44,10 +48,10 @@ class Sequence(AST):
 class Num(AST):
     """
     Num node
-    Represent a predefined type number
+    Represent a predefined type value
 
-    TODO: accept strings
-
+    TODO:accept strings and bool
+    
     Attributes
     ----------
     value : VALUE (string, int...)
@@ -62,14 +66,14 @@ class Num(AST):
 class BinOp(AST):
     """
     BinOp node
-    Represent a binary operation: + - * /...
+    Represent a binary operation: + - * mod = &&
 
     Attributes
     ----------
     left_node : AST node
         Left node
     op_token : Token
-        Operator toke,
+        Operator token
     right_node : AST Node
         Right Node
     """
@@ -104,7 +108,7 @@ class AssignementStatement(AST):
     assignements_list : [AST node]
         List countaining assignement nodes
     block_node : AST node
-        Node countaining the block to execute. Can be None
+        Node countaining the block to execute. Can be a UnitNode.
     """
     def __init__(self, assignements_list, block_node):
         self.assignements_list = assignements_list
@@ -161,13 +165,51 @@ class Variable(AST):
         #TODO: creer un AST node pour le point d'esclamation
 
 class PrintInt(AST):
+    """
+    PrintInt node
+
+    TODO: create a global Print node with a type arg
+
+    Attributes
+    ----------
+    node : AST node
+        Value to be printed
+    """
     def __init__(self, node):
         self.node = node
 
-class Boucle(AST):
+class PrintString(AST):
+    """
+    PrintInt node
+
+    TODO: create a global Print node with a type arg
+
+    Attributes
+    ----------
+    node : AST node
+        Value to be printed
+    """
+    def __init__(self, node):
+        self.node = node
+
+class Loop(AST):
+    """
+    Loop node
+
+    Attributes
+    ----------
+    boolean_node : AST node of type BOOL
+        Node of the condition of the loop
+    block_node : AST node
+        Executed code
+    """
     def __init__(self, boolean_node, block_node):
         self.boolean_node = boolean_node
         self.block_node = block_node
 
 class UnitNode(AST):
+    """
+    UnitNode node
+    Allow to have non executed node (usually return None of type UNIT)
+    """
     pass

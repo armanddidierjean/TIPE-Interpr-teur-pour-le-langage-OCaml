@@ -7,7 +7,10 @@ from baseclass import *
 #####################
 class InterpreterType(NodeVisitor):
     """
-    OCaml Interpreter
+    OCaml InterpreterType
+
+    Determine the type of the AST node
+    WARNING: this class is functionnal but still a WIP
 
     Methods
     -------
@@ -38,8 +41,8 @@ class InterpreterType(NodeVisitor):
     def visit_Sequence(self, node):
         log("Visiting Sequence")
         for command_node in node.commands_list[:-1]:
-            #TODO: return a warning if the result is not None
             type = self.visit(command_node)
+            # The type of the sequence elements, except the last should be unit
             if type != UNIT:
                 warning(f"{command_node} is of type {type} instead of unit in sequence")
         return self.visit(node.commands_list[-1])
@@ -50,9 +53,8 @@ class InterpreterType(NodeVisitor):
     
     def visit_BinOp(self, node):
         log("Visiting BinOp")
-        # TODO and MINUS AND SIV
-        #print(node.op_token.type)
         # Integer operations
+        # The left and right nodes should be of type int
         if node.op_token.type in (PLUS_INT, MINUS_INT, MUL_INT, DIV_INT):
             left_type = self.visit(node.left_node)
             if left_type != INT:
@@ -62,13 +64,14 @@ class InterpreterType(NodeVisitor):
                 error(f"Right node {node.right_node} is of type {right_type} instead of INTEGER in Binary Operation {node.op_token.type}")
             return INT
         # Boolean operation
+        # the left and right nodes should have the same type
         if node.op_token.type in (EQUALS, DIFFERENT):
             left_type = self.visit(node.left_node)
             right_type = self.visit(node.right_node)
             if left_type != right_type:
                 error(f"Left node {node.left_node} is of type {left_type} and right node {node.right_node} of type {right_type} which are not the same in Boolean Binary Operation {node.op_token.type}")
             return BOOL
-        warning("Undefined operation BinOp")
+        warning("Undefined operation BinOp", node.op_token.type)
         return UNIT
 
     def visit_UnaryOp(self, node):
@@ -95,7 +98,7 @@ class InterpreterType(NodeVisitor):
         # TODO: implement variable storage
         if not self.memory_table.isdefined(node.var_name):
             self.memory_table.define(node.var_name, node.is_ref, type=self.visit(node.value_node))
-            print(colors.CYELLOW, f"Assigning: {node.var_name} = {self.memory_table.get_value(node.var_name)}", colors.ENDC)
+            show(colors.CYELLOW, f"Assigning: {node.var_name} = {self.memory_table.get_value(node.var_name)}", colors.ENDC)
             return UNIT
         else:
             error("Memory error:", node.var_name, "is already defined")
@@ -162,14 +165,20 @@ class InterpreterType(NodeVisitor):
         if type != INT:
             error(f"Got {type} instead of INT in PrintInt")
         return UNIT
+
+    def visit_PrintString(self, node):
+        type = self.visit(node.node)
+        if type != STRING:
+            error(f"Got {type} instead of STRING in PrintString")
+        return UNIT
     
-    def visit_Boucle(self, node):
+    def visit_Loop(self, node):
         bool_type = self.visit(node.boolean_node)
         if bool_type != BOOL:
-            error(f"Boolean_node is of type {bool_type} instead of BOOL in Boucle")
+            error(f"Boolean_node is of type {bool_type} instead of BOOL in Loop")
         block_type = self.visit(node.block_node)
         if block_type != UNIT:
-            warning(f"Block node is of type {block_type} instead of UNIT in Boucle")
+            warning(f"Block node is of type {block_type} instead of UNIT in Loop")
         return UNIT
     
     def visit_UnitNode(self, node):

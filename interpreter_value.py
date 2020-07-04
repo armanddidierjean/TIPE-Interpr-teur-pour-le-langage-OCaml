@@ -38,19 +38,17 @@ class InterpreterValue(NodeVisitor):
     def visit_Sequence(self, node):
         log("Visiting Sequence")
         for command_node in node.commands_list[:-1]:
-            #TODO: return a warning if the result is not None
+            # The result of these nodes is not used
+            # # InterpreterType will return a warning if their type is not unit
             self.visit(command_node)
         return self.visit(node.commands_list[-1])
 
     def visit_Num(self, node):
         log("Visiting Num")
-        #TODO: Return type
         return node.value
     
     def visit_BinOp(self, node):
         log("Visiting BinOp")
-        # TODO and MINUS AND SIV
-
         # Integer operations
         if node.op_token.type == PLUS_INT:
             return self.visit(node.left_node) + self.visit(node.right_node)
@@ -62,17 +60,18 @@ class InterpreterValue(NodeVisitor):
             return self.visit(node.left_node) / self.visit(node.right_node)
 
         # Boolean operation
+        #TODO: check the type of elements: an equality between list should be an equality between it's content
         if node.op_token.type == EQUALS:
             return self.visit(node.left_node) == self.visit(node.right_node)
         if node.op_token.type == DIFFERENT:
             return self.visit(node.left_node) != self.visit(node.right_node)
 
     def visit_UnaryOp(self, node):
-        log("Visiting Unary Op")
+        log("Visiting UnaryOp")
         if node.op_token.type == PLUS_INT:
             return self.visit(node.right_node)
         if node.op_token.type == MINUS_INT:
-            return - self.visit(node.right_node)
+            return -self.visit(node.right_node)
     
     def visit_AssignementStatement(self, node):
         log("Visiting AssignementStatement")
@@ -81,24 +80,24 @@ class InterpreterValue(NodeVisitor):
         
         return self.visit(node.block_node)
     
+    # WARNING: the following methods need some improvements
+
     def visit_Assignement(self, node):
         log("Visiting Assignement")
-        # TODO: implement variable storage
         if not self.memory_table.isdefined(node.var_name):
             self.memory_table.define(node.var_name, node.is_ref, value=self.visit(node.value_node))
-            print(colors.CYELLOW, f"Assigning: {node.var_name} = {self.memory_table.get_value(node.var_name)}", colors.ENDC)
+            show(colors.CYELLOW, f"Assigning: {node.var_name} = {self.memory_table.get_value(node.var_name)}", colors.ENDC)
         else:
             print(colors.FAIL, "Memory error:", node.var_name, "is already defined", colors.ENDC)
             raise SyntaxError("Variable already defined")
 
     def visit_Reassignement(self, node):
         log("Visiting Reassignement")
-        # TODO: implement variable storage
         if self.memory_table.isdefined(node.var_name):
             if self.memory_table.isref(node.var_name):
                 # ref
                 self.memory_table.change_value(node.var_name, self.visit(node.new_value_node))
-                print(colors.CYELLOW, f"ReAssigning {node.var_name} := {self.memory_table.get_value(node.var_name)}", colors.ENDC)
+                log(colors.CYELLOW, f"ReAssigning {node.var_name} := {self.memory_table.get_value(node.var_name)}", colors.ENDC)
             else:
                 print(colors.FAIL, "Memory error:", node.var_name, "is not mutable", colors.ENDC)
                 raise SyntaxError("Variable not mutable")
@@ -113,7 +112,7 @@ class InterpreterValue(NodeVisitor):
         
         symbol = self.memory_table.get_symbol(node.var_name)
 
-        # If the symbol is mutable, we can retrun the value or ['ref', value]
+        # If the symbol is mutable, we can return the value or ['ref', value]
         if symbol.isref:
             if node.get_content:
                 show(colors.CYELLOW, f"Accessing content of mutable variable {node.var_name}", colors.ENDC)
@@ -145,9 +144,12 @@ class InterpreterValue(NodeVisitor):
         """
 
     def visit_PrintInt(self, node):
-        print(colors.OKGREEN, self.visit(node.node), colors.ENDC)
+        print(colors.BOLD, self.visit(node.node), colors.ENDC)
     
-    def visit_Boucle(self, node):
+    def visit_PrintString(self, node):
+        print(colors.BOLD, self.visit(node.node), colors.ENDC)
+    
+    def visit_Loop(self, node):
         while self.visit(node.boolean_node):
             # TODO: warning if the type is not None
             self.visit(node.block_node)
