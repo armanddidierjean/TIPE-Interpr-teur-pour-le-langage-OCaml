@@ -73,17 +73,17 @@ class InterpreterValue(NodeVisitor):
         if node.op_token.type == MINUS_INT:
             return -self.visit(node.right_node)
     
-    def visit_AssignementStatement(self, node):
-        log("Visiting AssignementStatement")
-        for assignement_node in node.assignements_list:
-            self.visit(assignement_node)
+    def visit_AssignmentStatement(self, node):
+        log("Visiting AssignmentStatement")
+        for assignment_node in node.assignments_list:
+            self.visit(assignment_node)
         
         return self.visit(node.block_node)
     
     # WARNING: the following methods need some improvements
 
-    def visit_Assignement(self, node):
-        log("Visiting Assignement")
+    def visit_Assignment(self, node):
+        log("Visiting Assignment")
         if not self.memory_table.isdefined(node.var_name):
             self.memory_table.define(node.var_name, node.is_ref, value=self.visit(node.value_node))
             show(colors.CYELLOW, f"Assigning: {node.var_name} = {self.memory_table.get_value(node.var_name)}", colors.ENDC)
@@ -91,8 +91,8 @@ class InterpreterValue(NodeVisitor):
             print(colors.FAIL, "Memory error:", node.var_name, "is already defined", colors.ENDC)
             raise SyntaxError("Variable already defined")
 
-    def visit_Reassignement(self, node):
-        log("Visiting Reassignement")
+    def visit_Reassignment(self, node):
+        log("Visiting Reassignment")
         if self.memory_table.isdefined(node.var_name):
             if self.memory_table.isref(node.var_name):
                 # ref

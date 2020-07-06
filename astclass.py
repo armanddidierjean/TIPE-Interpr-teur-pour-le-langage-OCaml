@@ -98,33 +98,33 @@ class UnaryOp(AST):
         self.op_token = op_token
         self.right_node = right_node
 
-class AssignementStatement(AST):
+class AssignmentStatement(AST):
     """
-    AssignementStatement node
+    AssignmentStatement node
     Represent a let statement
 
     Attributes
     ----------
-    assignements_list : [AST node]
-        List countaining assignement nodes
+    assignments_list : [AST node]
+        List countaining assignment nodes
     block_node : AST node
         Node countaining the block to execute. Can be a UnitNode.
     """
-    def __init__(self, assignements_list, block_node):
-        self.assignements_list = assignements_list
+    def __init__(self, assignments_list, block_node):
+        self.assignments_list = assignments_list
         self.block_node = block_node
 
-class Assignement(AST):
+class Assignment(AST):
     """
-    Assignement node
-    Represent an assignement
+    Assignment node
+    Represent an assignment
 
     Attributes
     ----------
     var_name : string
         Name of the defined variable
     is_ref : boolean
-        If the assignement is a mutable assignement
+        If the assignment is a mutable assignment
     value_node : AST node
         Expression assigned to the variable
     """
@@ -133,9 +133,9 @@ class Assignement(AST):
         self.is_ref = is_ref
         self.value_node = value_node
 
-class Reassignement(AST):
+class Reassignment(AST):
     """
-    Reassignement node
+    Reassignment node
 
     Attributes
     ----------
@@ -162,7 +162,7 @@ class Variable(AST):
     def __init__(self, var_name, get_content):
         self.var_name = var_name
         self.get_content = get_content
-        #TODO: creer un AST node pour le point d'esclamation
+        #TODO: créer un AST node pour le point d'exclamation
 
 class PrintInt(AST):
     """

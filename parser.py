@@ -212,7 +212,7 @@ class Parser:
         | FLOAT
         | PRINT_INT block
         | WHILE block DO block DONE
-        | assignement_statement ->(LET)
+        | assignment_statement ->(LET)
         | variable_statement
 
         DO NOT RETURN HIS OWN NODE
@@ -224,7 +224,7 @@ class Parser:
             self.eat(self.current_token.type)
             return node
         elif self.current_token.type == LET:
-            return self.assignement_statement()
+            return self.assignment_statement()
         elif self.current_token.type == WHILE:
             self.eat(WHILE)
             boolean_node = self.block()
@@ -242,38 +242,38 @@ class Parser:
         else:
             return self.variable_statement()
 
-    def assignement_statement(self):
+    def assignment_statement(self):
         """
-        LET assignement (AND assignement)* IN block
-        LET assignement (AND assignement)*
+        LET assignment (AND assignment)* IN block
+        LET assignment (AND assignment)*
 
         Return let_statement node
         """
-        log("Assignement_statement")
+        log("Assignment_statement")
         self.eat(LET)
 
-        assignements_list = [self.assignement()]
+        assignments_list = [self.assignment()]
 
         while self.current_token.type == AND:
             self.eat(AND)
-            assignements_list.append(self.assignement())
+            assignments_list.append(self.assignment())
         
         if self.current_token.type == IN:
             self.eat(IN)
             block = self.block()
         else:
-            show(colors.WARNING, "WARNING: parser:assignement_statement global variable are not implemented, using a UnitNode", colors.ENDC)
+            show(colors.WARNING, "WARNING: parser:assignment_statement global variable are not implemented, using a UnitNode", colors.ENDC)
             block = UnitNode()
         
-        return AssignementStatement(assignements_list, block)
+        return AssignmentStatement(assignments_list, block)
     
-    def assignement(self):
+    def assignment(self):
         """
         ID EQUALS block
 
-        Return assignement node
+        Return assignment node
         """
-        log("Assignement")
+        log("Assignment")
         var_name = self.current_token.value
         self.eat(ID)
 
@@ -286,7 +286,7 @@ class Parser:
             is_ref = False
         
         block_node = self.block()
-        return Assignement(var_name, is_ref, block_node)
+        return Assignment(var_name, is_ref, block_node)
 
     def variable_statement(self):
         """
@@ -307,6 +307,6 @@ class Parser:
 
         if self.current_token.type == REASSIGN:
             self.eat(REASSIGN)
-            return Reassignement(var_id, self.block())
+            return Reassignment(var_id, self.block())
         else:
             return Variable(var_id, get_content=False)

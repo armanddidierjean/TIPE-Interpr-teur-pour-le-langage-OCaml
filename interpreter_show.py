@@ -95,30 +95,30 @@ class InterpreterShow(NodeVisitor):
         self.deind()
         self.print_ind('}')
     
-    def visit_AssignementStatement(self, node):
-        self.print_ind('AssignementStatement')
+    def visit_AssignmentStatement(self, node):
+        self.print_ind('AssignmentStatement')
         self.print_ind('{')
         self.ind()
-        self.print_ind('Assignements:')
+        self.print_ind('Assignments:')
         self.ind()
-        for assignement_node in node.assignements_list:
-            self.visit(assignement_node)
+        for assignment_node in node.assignments_list:
+            self.visit(assignment_node)
         self.deind()
         self.print_ind('Block:')
         self.visit(node.block_node)
         self.deind()
         self.print_ind('}')
 
-    def visit_Assignement(self, node):
-        self.print_ind('Assignement', node.var_name)
+    def visit_Assignment(self, node):
+        self.print_ind('Assignment', node.var_name)
         self.print_ind('{')
         self.ind()
         self.visit(node.value_node)
         self.deind()
         self.print_ind('}')
 
-    def visit_Reassignement(self, node):
-        self.print_ind('Reassignement', node.var_name)
+    def visit_Reassignment(self, node):
+        self.print_ind('Reassignment', node.var_name)
         self.print_ind('{')
         self.ind()
         self.visit(node.value_node)
@@ -126,7 +126,7 @@ class InterpreterShow(NodeVisitor):
         self.print_ind('}')
         
     def visit_Variable(self, node):
-        self.print_ind('Reassignement', node.var_name)
+        self.print_ind('Reassignment', node.var_name)
         self.print_ind('{')
         self.ind()
         self.print_ind(node.var_name, "getcontent", node.get_content)

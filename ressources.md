@@ -37,18 +37,18 @@ sequence:   BEGIN END
 command:    INT
             FLOAT
             STRING
-            assignement_statement ->(LET)
+            assignment_statement ->(LET)
             WHILE block DO block DONE
             PRINT_INT block
             PRINT_STRING block
             variable_statement
 
-assignement_statement:  LET assignement (AND assignement)* IN block
+assignment_statement:  LET assignment (AND assignment)* IN block
 
-assignement:            ID EQUALS REF? block
+assignment:            ID EQUALS REF? block
 
 variable_statement:     EXCLAMATION ID
-                        ID REASSIGNE block
+                        ID REASSIGN block
                         ID
 ```
 
@@ -79,15 +79,16 @@ UnaryOp(op_token, right_node)
 
 # Commands
 Num(value, type)
-AssignementStatement(assignements_list, block_node)
-Boucle(boolean_node, block_node)
+AssignmentStatement(assignments_list, block_node)
+Loop(boolean_node, block_node)
 PrintInt(node)
+PrintString(node)
 
-# AssignementStatement
-Assignement(var_name, isref, value_node)
+# AssignmentStatement
+Assignment(var_name, isref, value_node)
 
 # Variable
-Reassignement(id, new_value_node)
+Reassignment(id, new_value_node)
 Variable(var_name, get_content)
 
 # Micelianous
