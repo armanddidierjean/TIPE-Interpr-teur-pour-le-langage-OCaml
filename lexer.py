@@ -58,7 +58,7 @@ class Lexer:
 
         Parameters
         ----------
-        nb : int, optionnal
+        nb : int, optional
             Number of character to return (default is 1)
         """
         if self.current_pos + nb > len(self.text):

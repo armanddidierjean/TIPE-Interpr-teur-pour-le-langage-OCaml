@@ -13,7 +13,7 @@ class Parser:
     -------
     parse()
         Parse the lexer's tokens flow and 
-        return and AST node corresponding to the recognised patern 
+        return and AST node corresponding to the recognized pattern 
 
     Parameters
     ----------
@@ -48,7 +48,7 @@ class Parser:
         
         Return Program node
         """
-        log("Programm")
+        log("Program")
         if self.current_token.type != SEMI:
             node = self.block()
         self.eat(SEMI)
@@ -81,7 +81,7 @@ class Parser:
         | MINUS block
         | pres1 ((PLUS | MINUS) pres1)*
 
-        USED FOR A BINOP OR A UNARYOP
+        USED FOR A BINOP OR AN UNARYOP
         """
         log("Pres0")
 
@@ -210,22 +210,27 @@ class Parser:
         """
           INT 
         | FLOAT
-        | PRINT_INT block
-        | WHILE block DO block DONE
+        | STRING
         | assignment_statement ->(LET)
+        | WHILE block DO block DONE
+        | PRINT_INT block
+        | PRINT_STRING block
         | variable_statement
 
         DO NOT RETURN HIS OWN NODE
         """
         log("Command")
         if self.current_token.type in (INT, FLOAT, STRING):
+            """INT | FLOAT | STRING"""
             node = Num(self.current_token.value, self.current_token.type)
             log("Command is eating a self type (should be a num):", self.current_token)
             self.eat(self.current_token.type)
             return node
         elif self.current_token.type == LET:
+            """assignment_statement"""
             return self.assignment_statement()
         elif self.current_token.type == WHILE:
+            """WHILE block DO block DONE"""
             self.eat(WHILE)
             boolean_node = self.block()
             self.eat(DO)
@@ -234,12 +239,15 @@ class Parser:
             log(f"Returning a Loop node boolean_node={boolean_node}, block_node={block_node}")
             return Loop(boolean_node, block_node)
         elif self.current_token.type == PRINT_INT:
+            """PRINT_INT block"""
             self.eat(PRINT_INT)
             return PrintInt(self.block())
         elif self.current_token.type == PRINT_STRING:
+            """PRINT_STRING block"""
             self.eat(PRINT_STRING)
             return PrintString(self.block()) 
         else:
+            """variable_statement"""
             return self.variable_statement()
 
     def assignment_statement(self):
@@ -259,9 +267,12 @@ class Parser:
             assignments_list.append(self.assignment())
         
         if self.current_token.type == IN:
+            """LET assignment (AND assignment)* IN block"""
             self.eat(IN)
             block = self.block()
         else:
+            """LET assignment (AND assignment)*"""
+            # We use a UnitNode node to create an assignment_statement without "IN block" part
             show(colors.WARNING, "WARNING: parser:assignment_statement global variable are not implemented, using a UnitNode", colors.ENDC)
             block = UnitNode()
         
@@ -269,7 +280,7 @@ class Parser:
     
     def assignment(self):
         """
-        ID EQUALS block
+        ID EQUALS REF? block
 
         Return assignment node
         """
@@ -290,23 +301,28 @@ class Parser:
 
     def variable_statement(self):
         """
-        EXCLAMATION ID
-
-        ID REASSIGN block
-        ID
+          EXCLAMATION ID
+        | ID REASSIGN block
+        | ID
         """
         log("Variable Statement")
+
+        """EXCLAMATION ID"""
         if self.current_token.type == EXCLAMATION:
             self.eat(EXCLAMATION)
             var_id = self.current_token.value
             self.eat(ID)
             return Variable(var_id, get_content=True)
-            
+        
+        """ID REASSIGN block
+         | ID               """
         var_id = self.current_token.value
         self.eat(ID)
 
         if self.current_token.type == REASSIGN:
+            """ID REASSIGN block"""
             self.eat(REASSIGN)
             return Reassignment(var_id, self.block())
         else:
+            """ID"""
             return Variable(var_id, get_content=False)

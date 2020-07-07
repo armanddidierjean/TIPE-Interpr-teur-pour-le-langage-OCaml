@@ -18,7 +18,7 @@ def test():
         (5, 'begin print_string "4\\"" (* print 4" (* then nested comments should work*) *); "Hello" end;;', STRING, "Hello")
     ]
     # Liste des erreurs rencontrées
-    eroors_list = []
+    errors_list = []
     for id, texte, type_expected, value_expected in tests_list:
         lexer = Lexer(texte)
         parser = Parser(lexer)
@@ -33,18 +33,18 @@ def test():
         value_res = interpreter_value.interpret()
 
         if type_expected != type_res:
-            eroors_list.append(f"Erreur got {type_res} instead of {type_expected} for test {id}")
+            errors_list.append(f"Erreur got {type_res} instead of {type_expected} for test {id}")
         if value_expected != value_res:
-            eroors_list.append(f"Erreur got {value_res} instead of {value_expected} for test {id}")
-    if len(eroors_list) == 0:
+            errors_list.append(f"Erreur got {value_res} instead of {value_expected} for test {id}")
+    if len(errors_list) == 0:
         print(colors.OKGREEN, "##############")
         print(f" # Tests: {len(tests_list)}/{len(tests_list)} #")
         print(" ##############", colors.ENDC)
     else:
         print(colors.FAIL, "##############")
-        print(f" # Tests: {len(tests_list) - len(eroors_list)}/{len(tests_list)} #")
+        print(f" # Tests: {len(tests_list) - len(errors_list)}/{len(tests_list)} #")
         print(" ##############", colors.ENDC)
-        error(*eroors_list)
+        error(*errors_list)
 
 
 text1="1+2;;"
