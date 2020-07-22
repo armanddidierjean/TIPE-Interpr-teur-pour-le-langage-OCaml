@@ -39,7 +39,7 @@ class InterpreterValue(NodeVisitor):
         log("Visiting Sequence")
         for command_node in node.commands_list[:-1]:
             # The result of these nodes is not used
-            # # InterpreterType will return a warning if their type is not unit
+            # InterpreterType will return a warning if their type is not unit
             self.visit(command_node)
         return self.visit(node.commands_list[-1])
 

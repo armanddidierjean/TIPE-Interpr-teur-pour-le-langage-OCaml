@@ -68,7 +68,7 @@ class InterpreterType(NodeVisitor):
                 error(f"Right node {node.right_node} is of type {right_type} instead of INTEGER in Binary Operation {node.op_token.type}")
             return INT
         # Boolean operation
-        # the left and right nodes should have the same type
+        # The left and right nodes should have the same type
         if node.op_token.type in (EQUALS, DIFFERENT):
             left_type = self.visit(node.left_node)
             right_type = self.visit(node.right_node)
@@ -93,7 +93,7 @@ class InterpreterType(NodeVisitor):
         log("Visiting AssignmentStatement")
         for assignment_node in node.assignments_list:
             type = self.visit(assignment_node)
-            # The type os the assignments should be unit
+            # The type of the assignments should be unit
             if type != UNIT:
                 warning(f"{assignment_node} is of type {type} instead of unit in assignment statement")
         

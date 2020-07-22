@@ -1,7 +1,39 @@
+# Project
+* Utiliser une enum pour les TokenType
+* Installer un systeme de scope pour la memoire (utilise on le meme our tout les interpreteurs?)
+* Mettre en place le parsing de fonctions
+
+# Fonctions
+
+Deux syntaxes
+```
+let a = fun PARAMS -> BLOCK
+let a PARAMS = BLOCK
+```
+
+grammar:
+```
+Fonction:
+LET ID (ID)+ EQUALS BLOCK
+LET ID EQUALS (FUN|FUNCTION) (ID)* ARROW BLOCK
+
+LET ID EQUALS BLOCK
+```
+TODO: Creer un type `FUN ID* -> BLOCK` 
+
+Appel de fonctions A TESTER
+C'est bien left associatif
+```
+ID BLOCK==UnitNode -> variable
+ID BLOCK (BLOCK)* BLOCK==UnitNode -> nested functionCall
+```
 
 # TODO
 Permettre d'avoir des elements vide: LPAREN RPAREN ou BEGIN END
-Concatenate
+* Concatenate
+* If statement
+* fail_withs
+
 
 # Nouvelle Grammaire
 Problème : l'operation 2 * 2 + 2 était associée comme ceci : 2 * (2 + 2) ou (2 + 2) est un block

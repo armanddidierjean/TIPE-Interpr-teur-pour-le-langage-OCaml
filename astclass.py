@@ -2,7 +2,7 @@
 #     AST  Nodes    #
 #####################
 """
-File containing all class use to create the tree representing the program
+File containing all class used to create the tree representing the program
 """
 
 class AST:
