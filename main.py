@@ -14,8 +14,9 @@ def test():
         (1, "1 + 2 * 2 + 2;;", INT, 7),
         (2, "let a = ref 0 in while !a <> 4 do begin print_int !a; a := !a + 1 end done;;", UNIT, None),
         (3, "let i = ref 1 and n = 10 in while !i <> n do begin print_int !i; i := !i + 1 end done;;", UNIT, None),
-        (4, "let a = ref 'Hello World!' in print_string !a;;", UNIT, None),
-        (5, 'begin print_string "4\\"" (* print 4" (* then nested comments should work*) *); "Hello" end;;', STRING, "Hello")
+        (4, "let a = ref 'hello world' in begin a := 'Hello World!'; print_string !a end;;", UNIT, None),
+        (5, 'begin print_string "4\\"" (* print 4" (* then nested comments should work*) *); "Hello" end;;', STRING, "Hello"),
+        (6, "let a = 'text' in let a = 3 in a;;", INT, 3),
     ]
     # Liste des erreurs rencontrées
     errors_list = []
@@ -72,7 +73,9 @@ let i = ref 1 and n = 10
 
 #text = "'text';;"
 
-text = "let a = ref 6 in 1;;"
+#text = "let a = ref 6 in 1;;"
+
+text = "let a = ref 't' in begin a := 'Text'; print_string !a end;;"
 
 lexer = Lexer(text)
 parser = Parser(lexer)
@@ -86,7 +89,6 @@ interpreter_type = InterpreterType(node)
 type_res = interpreter_type.interpret()
 interpreter_value = InterpreterValue(node)
 value_res = interpreter_value.interpret()
-
 
 print(colors.OKBLUE, "Interpret result:", type_res, "-", value_res, colors.ENDC)
 

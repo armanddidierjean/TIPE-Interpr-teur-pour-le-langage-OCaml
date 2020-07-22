@@ -34,6 +34,19 @@ Permettre d'avoir des elements vide: LPAREN RPAREN ou BEGIN END
 * If statement
 * fail_withs
 
+Creer plusieurs classes de symboles:
+    var (id, value, type, isref)
+    type (id, type)
+    function(id, formal_params[Symbole-var], type)
+
+
+Init base type
+
+Call main toplevel
+
+Rename isdefined -> is_defined
+isref -> is_ref 
+Ou dans l'autre sens
 
 # Nouvelle Grammaire
 Problème : l'operation 2 * 2 + 2 était associée comme ceci : 2 * (2 + 2) ou (2 + 2) est un block

@@ -77,76 +77,73 @@ class Symbol(object):
 
 class MemoryTable(object):
     """
-    Class that manage a basic memory system. Is based on a Python dictionnary
+    Memory system, allow to store symbol, support nested scopes
 
-    WARNING: This class is a usable WIP
-    TODO: Improve the class
-
+    Attributes
+    ----------
+    scope_name : string
+    scope_level : int
+    following_table : MemoryTable object
+        A memory table where symbole are already defined and where the table should look for unavailable requested symbols
+    
     Methods
     -------
-    define(id, isref, type=None, value=None)
-        define a new symbol in the memory
-        check if the id is already used
-    isdefined(id)
-        return True if id is in the memory
-    isref(id)
-        return True if the symbol id is mutable
-        WARNING: do not check if id is defined
-    change_value(id, value)
-        Change the value of the id symbol
-        WARNING: do not check if id is defined or mutable
-    get_value(id)
-        return the value of the symbol id
-        WARNING: do not check if id is defined
-    get_type(id)
-        return the type of the symbol id
-        WARNING: do not check if id is defined
-
-    TODO: remove or modify:
-    get_symbol(id, getref=False)
+    define(id, symbol)
+        Define a symbol in the memory
+    get(id)
+        Return the symbol id defined in the table or in the following
+        Return None if id is not defined
+    isdefined(id, look_following_table=True)
+        Return if id is defined
     """
-    def __init__(self):
-        self.memoryTable = {}
+    def __init__(self, scope_name, scope_level, following_table):
+        self.scope_name = scope_name
+        self.scope_level = scope_level
+        self.following_table = following_table
+
+        self._memory = {}
     
-    def define(self, id, isref, type=None, value=None):
+    def define(self, id, symbol):
         """
         Define a new symbol
         """
-        if self.isdefined(id):
-            raise NameError(f"{id} is already defined")
+        self._memory[id] = symbol
+    
+    def get(self, id):
+        """
+        Return the symbol id
+        """
+        symbol = self._memory.get(id)  # symbol is None if it is not in self._memory
+
+        if symbol is not None:
+            # If the symbol is define in this table, return it
+            return symbol
+        else:
+            if self.following_table is not None:
+                # If the symbol is not defined in this table, it should be in the following_table
+                return self.following_table.get(id)
+            # There is no following table
+            return None
         
-        self.memoryTable[id] = Symbol(id, isref, value, type)
-    
-    def isdefined(self, id):
-        return id in self.memoryTable
-    
-    def isref(self, id):
-        return self.memoryTable[id].isref
-    
-    def change_value(self, id, value):
-        self.memoryTable[id].value = value
-    
-    def get_value(self, id):
-        return self.memoryTable[id].value
+    def isdefined(self, id, look_following_table=True):
+        """
+        Return is the symbol id is already defined
 
-    def get_type(self, id):
-        return self.memoryTable[id].type
-    """
-    def reassign(self, id, type=None, value=None):
-        if not id in self.memoryTable:
-            raise NameError(f"{id} is not defined")
-        if not self.memoryTable[id].isref:
-            raise TypeError("{id} is not mutable")
-        MemoryTable[id].type = type
-        MemoryTable[id].value = value
-    """
-    def get_symbol(self, id, getref=False):
-        if not self.isdefined(id):
-            raise NameError(f"{id} is not defined")
+        Attributes
+        ----------
+        id : string
+            Id of the searched symbol
+        look_following_table : bool
+            If the function should search id in the following tables
+        """
+        symbol = self._memory.get(id)  # symbol is None if it is not in self._memory
 
-        return self.memoryTable[id]
-
-
-
-    
-
+        if symbol is not None:
+            # If the symbol is define in this table, return True
+            return True
+        else:
+            # If the symbol is not defined in this table, it should be in the following_table
+            if look_following_table and self.following_table is not None:
+                return self.following_table.isdefined(id, look_following_table=True)
+            else:
+                return False

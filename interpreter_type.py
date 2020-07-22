@@ -24,16 +24,33 @@ class InterpreterType(NodeVisitor):
     """
     def __init__(self, AST_node):
         self.AST_node = AST_node
-        self.memory_table = MemoryTable()
+
+        # Base memory table, countain builtin types
+        self.memory_table = MemoryTable("Main", 0, None)
+        self._init_base_types()
+    
+    def _init_base_types(self):
+        print("TODO: Initing base type")
     
     def interpret(self):
         return self.visit(self.AST_node)
     
-    #   Nodes visitor   #
+    #   Nodes visitors   #
     def visit_Program(self, node):
         log("Visiting Program")
+
+        # Create a MemoryTable for the program, this allow to define local variables.
+        mt = MemoryTable("Program", 1, self.memory_table)
+        self.memory_table = mt
+
         # The type of the program is the type of the block node
-        return self.visit(node.block_node)
+        type = self.visit(node.block_node)
+
+        # Remove the Program memory table
+        self.memory_table = self.memory_table.following_table
+
+        # Return the type
+        return type
     
     def visit_Block(self, node):
         log("Visiting Block")
@@ -91,36 +108,64 @@ class InterpreterType(NodeVisitor):
     
     def visit_AssignmentStatement(self, node):
         log("Visiting AssignmentStatement")
+
+        # An assignement statement can create a new memory table with local variables 
+        # or define variables in the current memory table
+
+        # The syntax (LET assignments IN block) create a new memory table of level: current level + 1
+        # The syntax (LET assignments) define variables in the current memory level
+
+        # We need to create a new memory table if node.block_node is not an instance of UnitNode
+        #create_a_new_memory_table = not isinstance(node.block_node, UnitNode)
+        create_a_new_memory_table = type(node).__name__ != "UnitNode"
+        
+        if create_a_new_memory_table:
+            print("Not an unit node : new memory table ")
+            mt = MemoryTable("Assignement scope", self.memory_table.scope_level + 1, self.memory_table)
+            self.memory_table = mt
+        else:
+            print("Unit node : Define var in the current level")
+        
         for assignment_node in node.assignments_list:
-            type = self.visit(assignment_node)
+            assignement_type = self.visit(assignment_node)
             # The type of the assignments should be unit
-            if type != UNIT:
+            #TODO: is this really useful?
+            if assignement_type != UNIT:
                 warning(f"{assignment_node} is of type {type} instead of unit in assignment statement")
         
-        return self.visit(node.block_node)
+        result_type = self.visit(node.block_node)
+
+        if create_a_new_memory_table:
+            # After evaluating the block, we need to remove the corresponding memory table
+            self.memory_table = self.memory_table.following_table
+        
+        return result_type
     
     def visit_Assignment(self, node):
         log("Visiting Assignment")
-        # TODO: implement variable storage
-        if not self.memory_table.isdefined(node.var_name):
-            self.memory_table.define(node.var_name, node.is_ref, type=self.visit(node.value_node))
-            show(colors.CYELLOW, f"Assigning: {node.var_name} = {self.memory_table.get_value(node.var_name)}", colors.ENDC)
+        # We need to check the variable is not already defined as a local variable in the current memory table.
+        if not self.memory_table.isdefined(node.var_name, look_following_table=False):
+            # We create a new symbol corresponding to the variable, the value is None as we are only searching the type
+            symbol = Symbol(node.var_name, node.is_ref, value=None, type=self.visit(node.value_node))
+            self.memory_table.define(node.var_name, symbol)
+            show(colors.CYELLOW, f"Assigning: {node.var_name} with type {symbol.type}", colors.ENDC)
+            # An assignement is of type UNIT
             return UNIT
         else:
-            error("Memory error:", node.var_name, "is already defined")
+            error("Memory error:", node.var_name, "is already defined in the current memory table")
             raise SyntaxError("Variable already defined")
 
     def visit_Reassignment(self, node):
         log("Visiting Reassignment")
-        # TODO: implement variable storage
         if self.memory_table.isdefined(node.var_name):
-            if self.memory_table.isref(node.var_name):
-                # ref
+            symbol = self.memory_table.get(node.var_name)
+            if symbol.isref:
+                # The variable can be reassigned
                 value_type = self.visit(node.new_value_node)
-                if self.memory_table.get_type(node.var_name) != value_type:
-                    error(f"New value node {node.new_value_node} is of type {value_type} instead of {self.memory_table.get_type(node.var_name)} in Reassignment of {node.var_name}")
+                if symbol.type != value_type:
+                    error(f"New value node {node.new_value_node} is of type {value_type} instead of {symbol.type} in Reassignment of {node.var_name}")
+                # A reassignement is of type UNIT
                 return UNIT
-                #print(colors.CYELLOW, f"ReAssigning {node.var_name} := {self.memory_table.get_value(node.var_name)}", colors.ENDC)
             else:
                 error("Memory error:", node.var_name, "is not mutable")
                 raise SyntaxError("Variable not mutable")
@@ -128,43 +173,34 @@ class InterpreterType(NodeVisitor):
             error("Memory error:", node.var_name, "is not defined")
             raise SyntaxError("Variable not defined")
         
-    
     def visit_Variable(self, node):
         log("Visiting Variable")
         log(f"Searshing the variable {node.var_name} {node.get_content}")
         
-        symbol = self.memory_table.get_symbol(node.var_name)
-
-        # If the symbol is mutable, we can retrun the value or ['ref', value]
-        if symbol.isref:
-            if node.get_content:
-                show(colors.CYELLOW, f"Accessing content of mutable variable {node.var_name}", colors.ENDC)
-                return symbol.type
-            else:
-                show(colors.CYELLOW, f"Accessing mutable variable {node.var_name}", colors.ENDC)
-                return ['ref', symbol.type]
+        if not self.memory_table.isdefined(node.var_name, look_following_table=True):
+            raise MemoryError(f"The variable {node.var_name} is not defined")
         else:
-            # The variable is not mutable
-            show(colors.CYELLOW, f"Accessing content of variable {node.var_name}", colors.ENDC)
-            return symbol.type
+            # The variable is defined, we can access it
+            symbol = self.memory_table.get(node.var_name)
 
-        """
-        # Methode sans table memoire
-        if node.var_name in MEMORY:
-            if MEMORY[node.var_name][0]:
+            # If the symbol is mutable, we can return the value or ['ref', value]
+            if symbol.isref:
                 if node.get_content:
+                    # The variable is mutable and we are accessing its value (!var)
                     show(colors.CYELLOW, f"Accessing content of mutable variable {node.var_name}", colors.ENDC)
-                    return MEMORY[node.var_name][1]
+                    return symbol.type
                 else:
+                    # The variable is mutable
                     show(colors.CYELLOW, f"Accessing mutable variable {node.var_name}", colors.ENDC)
-                    return MEMORY[node.var_name]
+                    return ['ref', symbol.type]
             else:
-                show(colors.CYELLOW, f"Accessing content of variable {node.var_name}", colors.ENDC)
-                return MEMORY[node.var_name][1]
-        else:
-            print(colors.FAIL, "Memory error:", node.var_name, "is not defined", colors.ENDC)
-            raise SyntaxError("Variable not defined")
-        """
+                if node.get_content:
+                    # The variable is not mutable and we are accessing its value (!var)
+                    raise SyntaxError("Variable not mutable but its content is accessed")
+                else:
+                    # The variable is not mutable
+                    show(colors.CYELLOW, f"Accessing content of variable {node.var_name}", colors.ENDC)
+                    return symbol.type
 
     def visit_PrintInt(self, node):
         type = self.visit(node.node)
