@@ -1,6 +1,5 @@
 # Project
 * Utiliser une enum pour les TokenType
-* Installer un systeme de scope pour la memoire (utilise on le meme our tout les interpreteurs?)
 * Mettre en place le parsing de fonctions
 
 # Fonctions
@@ -48,6 +47,9 @@ Rename isdefined -> is_defined
 isref -> is_ref 
 Ou dans l'autre sens
 
+
+Supporter les couples
+
 # Nouvelle Grammaire
 Problème : l'operation 2 * 2 + 2 était associée comme ceci : 2 * (2 + 2) ou (2 + 2) est un block
 
@@ -88,9 +90,12 @@ command:    INT
             PRINT_STRING block
             variable_statement
 
-assignment_statement:  LET assignment (AND assignment)* IN block
+assignment_statement:   LET assignment (AND assignment)* IN block
 
-assignment:            ID EQUALS REF? block
+assignment:             ID EQUALS FUNCTION function_body
+                        ID EQUALS REF? block
+
+function_body:          (LPAREN RPAREN)|ID) (ARROW block|function_body)
 
 variable_statement:     EXCLAMATION ID
                         ID REASSIGN block
@@ -139,4 +144,6 @@ Variable(var_name, get_content)
 # Micelianous
 UnitNode()          # Used to represent a portion of code that
                     # should not be executed ("begin end", "()")
+
+Function(parameter_id, content_node)
 ```

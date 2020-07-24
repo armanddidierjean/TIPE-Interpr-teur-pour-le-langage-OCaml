@@ -153,3 +153,13 @@ class InterpreterShow(NodeVisitor):
         
     def visit_UnitNode(self, node):
         self.print_ind('UnitNode')
+    
+    def visit_Function(self, node):
+        self.print_ind('Function')
+        self.print_ind('{')
+        self.ind()
+        self.print_ind(f"parameter: {node.parameter_id}")
+        self.print_ind('Content')
+        self.visit(node.content_node)
+        self.deind()
+        self.print_ind('}')

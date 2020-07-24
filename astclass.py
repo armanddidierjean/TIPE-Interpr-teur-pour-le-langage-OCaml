@@ -213,3 +213,19 @@ class UnitNode(AST):
     Allow to have non executed node (usually return None of type UNIT)
     """
     pass
+
+class Function(AST):
+    """
+    Node used to store a function declaration
+
+    Attributes
+    ----------
+    parameter_id : string or None
+        Name of the parameter
+        Can be none if the parameter is unit
+    content_node : AST node
+        Body of the function, can be an other function or a block node
+    """
+    def __init__(self, parameter_id, content_node):
+        self.parameter_id = parameter_id
+        self.content_node = content_node

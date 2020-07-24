@@ -36,6 +36,7 @@ DIFFERENT = 'DIFFERENT'
 REASSIGN = 'REASSIGN'
 DOT = 'DOT'
 EXCLAMATION = 'EXCLAMATION'
+ARROW = 'ARROW'
 
 ############### OCAML keywords ###############
 LET = 'LET'
@@ -47,6 +48,7 @@ END = 'END'
 WHILE = 'WHILE'
 DO = 'DO'
 DONE = 'DONE'
+FUNCTION = 'FUNCTION'
 
 ############### Types ###############
 INT = 'INT'
@@ -68,4 +70,6 @@ RESERVED_KEYWORDS = {
     'mod': Token(MOD, None),
     'print_int': Token(PRINT_INT, None),
     'print_string': Token(PRINT_STRING, None),
+    'function': Token(FUNCTION, None),
+    'fun': Token(FUNCTION, None),
 }

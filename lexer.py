@@ -180,6 +180,11 @@ class Lexer:
             else:
                 return Token(ID, name)
 
+        ############### Two characters ###############
+        if self.peek(2) == '->':
+            self.advance(2)
+            return Token(ARROW, '->')
+            
         ############### BINOP ###############
         if self.peek(2) == '+.':
             self.advance(2)

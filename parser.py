@@ -280,6 +280,7 @@ class Parser:
     
     def assignment(self):
         """
+        ID EQUALS function (-> FUNCTION)
         ID EQUALS REF? block
 
         Return assignment node
@@ -290,14 +291,59 @@ class Parser:
 
         self.eat(EQUALS)
 
-        if self.current_token.type == REF:
-            self.eat(REF)
-            is_ref = True
-        else:
+        if self.current_token.type == FUNCTION:
+            # It's a function declaration
+            self.eat(FUNCTION)
+            # The function is represented by the Function class.
+            # let f = fun a b c -> block 
+            # will be stored as Function(a -> Function(b -> Function(c -> block)))
+            print("searching a function body")
+            block_node = self.function_body()
             is_ref = False
+        else:
+            # It's not a function declaration
+            # It's then a variable declaration
+            if self.current_token.type == REF:
+                self.eat(REF)
+                is_ref = True
+            else:
+                is_ref = False
         
-        block_node = self.block()
+            block_node = self.block()
+
         return Assignment(var_name, is_ref, block_node)
+
+    def function_body(self):
+        """
+        (LPAREN RPAREN)|ID) (ARROW block|function_body)
+
+        Return a function node.
+        This function allow to use recursion to create the nested Functions nodes
+        """
+        
+        if self.current_token.type == LPAREN:
+            """LPAREN RPAREN"""
+            self.eat(LPAREN)
+            #TODO: Support couples
+            self.eat(RPAREN)
+            # It's an unit parameter
+            parameter_id = None
+        else:
+            """ID"""
+            parameter_id = self.current_token.value
+            self.eat(ID)
+        
+        if self.current_token.type == ARROW:
+            """ARROW block"""
+            self.eat(ARROW)
+            block_node = self.block()
+            return Function(parameter_id, block_node)
+
+        else:
+            """function_body"""
+            function_node = self.function_body()
+
+            return Function(parameter_id, function_node)
 
     def variable_statement(self):
         """
