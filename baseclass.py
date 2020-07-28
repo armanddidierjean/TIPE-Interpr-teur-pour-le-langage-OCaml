@@ -69,11 +69,94 @@ class Symbol(object):
     type : PREDEFINED TYPE
         Type of symbol
     """
+    symbol_type = "Symbol"
     def __init__(self, id, isref, value, type):
         self.id = id
         self.isref = isref
         self.value = value
         self.type = type
+
+class SymbolType(Symbol):
+    """
+    Represent a type
+    - builtin type
+    - composites type (int -> string)
+    """
+    def __init__(self, id):
+        self.id = id
+        #self.type = type
+        #TODO: remove type
+
+class SymbolQuoteType(Symbol):
+    """
+    Represent a quote type ('a, 'b)
+    This class allow to use placeolder type 'a. They can or not be resolved ('a = int or 'a = None)
+    
+    TODO: Document
+    A comparison is managed by this class
+     - is equals
+     - resolve the unresolved quote type
+    TODO: Assumption: when a comparison is done we can fix the type
+
+    Attributes
+    ----------
+    id : string
+    resolved_type : SymbolType object
+        When we know what type should be a 'a object, we attribute it to resolved_type
+        This allow to do type determination for procedure parameters
+    """
+    def __init__(self, id, resolved_type=None):
+        self.id = id
+        self.resolved_type = resolved_type
+
+    def __eq__(self, other):
+        if self.resolved_type is None:
+            print("Comparing resolved")
+            # We can now resolve the two elements
+            self.resolved_type = other
+            return True
+        else:
+            print("Comparing unresolved")
+            # The type is already resolved. We then need to 
+            return self.resolved_type == other
+    
+    def __str__(self):
+        if self.resolved_type is not None:
+            return f"<SymbolQuoteType:{self.id} is {self.resolved_type}>"
+        else:
+            return f"<SymbolQuoteType:{self.id}>"
+    
+    def __repr__(self):
+        return self.__str__()
+    
+class SymbolVariable(Symbol):
+    def __init__(self, id, isref, value, type):
+        self.id = id
+        self.isref = isref
+        self.value = value
+        self.type = type
+        self.symbol_type = "Variable"
+    
+    def __str__(self):
+        return f"Variable {self.id}: isref={self.isref}; value={self.value}; type={self.type}"
+
+class SymbolFunction(Symbol):
+    def __init__(self, id, parameters_list, parameters_types_list, function_body_node, result_type):
+        self.id = id
+        self.parameters_list = parameters_list
+        self.parameters_types_list = parameters_types_list
+        self.function_body_node = function_body_node
+        self.result_type = result_type
+
+        self.symbol_type = "Function"
+    
+    def __str__(self):
+        text = f"Function {self.id}: "
+        for param, ptype in zip(self.parameters_list, self.parameters_types_list):
+            text += f"{param}:{ptype} -> "
+        text += str(self.result_type)
+
+        return text
 
 class MemoryTable(object):
     """
@@ -147,3 +230,30 @@ class MemoryTable(object):
                 return self.following_table.isdefined(id, look_following_table=True)
             else:
                 return False
+        
+    def __str__(self):
+        text = "\n\n"
+        text += "Memory Table\n"
+        text += "============\n"
+        text += "scope_name: " + str(self.scope_name) + '\n'
+        text += "scope_level: " + str(self.scope_level) + '\n'
+
+        text += "\n"
+        text += "Content:\n"
+        text += "--------\n"
+
+        for obj_id in self._memory.keys():
+            text += str(obj_id) + ": " + str(self._memory[obj_id]) + "\n"
+        
+        text += "\n"
+        text += "Following table:\n"
+        text += "----------------\n"
+
+        text += self.following_table.__str__()
+
+        text += "\n============\n\n"
+
+        return text
+
+    def __repr__(self):
+        return self.__str__()

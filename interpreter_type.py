@@ -28,9 +28,14 @@ class InterpreterType(NodeVisitor):
         # Base memory table, countain builtin types
         self.memory_table = MemoryTable("Main", 0, None)
         self._init_base_types()
+
+        # Used to generate new quote type ('a, 'b...)
+        self.quote_index = 0
     
     def _init_base_types(self):
-        print("TODO: Initing base type")
+        print("Initing base type")
+        for symbol in BUILTIN_TYPES:
+            self.memory_table.define(symbol.id, symbol)
     
     def interpret(self):
         return self.visit(self.AST_node)
@@ -139,17 +144,105 @@ class InterpreterType(NodeVisitor):
             # After evaluating the block, we need to remove the corresponding memory table
             self.memory_table = self.memory_table.following_table
         
+        #TODO: remove memory_table print
+        print(self.memory_table)
+
         return result_type
     
-    def visit_Assignment(self, node):
-        log("Visiting Assignment")
-        # We need to check the variable is not already defined as a local variable in the current memory table.
+    def visit_AssignmentVariable(self, node):
+        log("Visiting AssignmentVariable")
+        # We need to check a variable is not already defined as a local variable in the current memory table with the same id.
         if not self.memory_table.isdefined(node.var_name, look_following_table=False):
             # We create a new symbol corresponding to the variable, the value is None as we are only searching the type
-            symbol = Symbol(node.var_name, node.is_ref, value=None, type=self.visit(node.value_node))
+            symbol = SymbolVariable(node.var_name, node.is_ref, value=None, type=self.visit(node.value_node))
             self.memory_table.define(node.var_name, symbol)
             show(colors.CYELLOW, f"Assigning: {node.var_name} with type {symbol.type}", colors.ENDC)
             # An assignement is of type UNIT
+            return UNIT
+        else:
+            error("Memory error:", node.var_name, "is already defined in the current memory table")
+            raise SyntaxError("Variable already defined")
+    
+    def visit_AssignmentFunction(self, node):
+        log("Visiting AssignmentFunction")
+        # We need to check a variable is not already defined as a local symbol in the current memory table with the same id.
+        if not self.memory_table.isdefined(node.var_name, look_following_table=False):
+            # We create a new symbol corresponding to the function
+
+            # Construire la liste de parametres
+            # Executer le corps qui se chargera de l'inference de types
+            # Construire le symbole representant la fonction et l'enregistrer
+            
+            # 1 We get the data of the function, it will be used to create the symbol
+            # node is an object of AssignementFunction
+            function_id = node.var_name
+            function_node = node.content_node
+
+            parameters_list = function_node.parameters_list
+
+            # 2 We create a new memory table for the function body, it will be used to determine parameters type
+            mt = MemoryTable(function_id, self.memory_table.scope_level + 1, self.memory_table)
+            
+
+            for parameter_id in parameters_list:
+                # We add each parameters to the memory table
+                # By default each type is defined to a quote type
+                if parameter_id is None:
+                    # The parameter can be an UNIT parameter. 
+                    # We don't need to add it to the memory table
+                    # This happen for example when we declare `let f = fun () -> 1`
+                    pass
+                else:
+                    quote_symbol = SymbolQuoteType(chr(ord("a")+self.quote_index), resolved_type=None)
+                    self.quote_index += 1
+                    # self.quote_index contain the index of the next to use quote position character
+                    
+                    parameter_symbol = SymbolVariable(parameter_id, isref=False, value=None, type=quote_symbol)
+                    mt.define(parameter_id, parameter_symbol)
+            
+            self.memory_table = mt
+            
+            # 3 We determine the type of the result. Parameters type will be determined too
+            result_type = self.visit(function_node.function_body_node)
+            
+            # 4 The parameters types should now be determined. We can create the list parameters_types_list.
+            parameters_types_list = []
+            for parameter_id in parameters_list:
+                if parameter_id is None:
+                    # The parameter is of type UNIT
+                    parameter_type = UNIT
+                else:
+                    parameter_symbol = mt.get(parameter_id)
+                    parameter_type = parameter_symbol.type
+                parameters_types_list.append(parameter_type)
+                # The list parameters_types_list countain the respectives types of parameters_list
+
+            #TODO:REMOVE
+            print("Determining function declaration parameters")
+            print(self.memory_table)
+
+            # 4 We remove the memory table and define the function symbol
+            self.memory_table = self.memory_table.following_table
+            
+            function_symbol = SymbolFunction(function_id, parameters_list, parameters_types_list, function_node.function_body_node, result_type)
+            self.memory_table.define(function_id, function_symbol)
+
+            print("Dfining function")
+            print(self.memory_table)
+            
+            show(colors.CYELLOW, f"Assigning function: {function_id} with parameters: {list(zip(parameters_list, parameters_types_list))} result type {result_type} and function_body_node:{function_node.function_body_node}", colors.ENDC)
+            # An assignement is of type UNIT
+            
+            # Type is of the form "int -> string -> string"
+            function_object_type = ""
+            for parameter_type in parameters_types_list:
+                function_object_type += str(parameter_type)
+                function_object_type += " -> "
+            function_object_type += result_type
+            
+            print("function_object_type", function_object_type)
+
+
             return UNIT
         else:
             error("Memory error:", node.var_name, "is already defined in the current memory table")
@@ -159,16 +252,20 @@ class InterpreterType(NodeVisitor):
         log("Visiting Reassignment")
         if self.memory_table.isdefined(node.var_name):
             symbol = self.memory_table.get(node.var_name)
-            if symbol.isref:
-                # The variable can be reassigned
-                value_type = self.visit(node.new_value_node)
-                if symbol.type != value_type:
-                    error(f"New value node {node.new_value_node} is of type {value_type} instead of {symbol.type} in Reassignment of {node.var_name}")
-                # A reassignement is of type UNIT
-                return UNIT
+            if symbol.symbol_type != "Variable":
+                error("It's not a variable")
+                raise SyntaxError("It's not a variable")
             else:
-                error("Memory error:", node.var_name, "is not mutable")
-                raise SyntaxError("Variable not mutable")
+                if symbol.isref:
+                    # The variable can be reassigned
+                    value_type = self.visit(node.new_value_node)
+                    if symbol.type != value_type:
+                        error(f"New value node {node.new_value_node} is of type {value_type} instead of {symbol.type} in Reassignment of {node.var_name}")
+                    # A reassignement is of type UNIT
+                    return UNIT
+                else:
+                    error("Memory error:", node.var_name, "is not mutable")
+                    raise SyntaxError("Variable not mutable")
         else:
             error("Memory error:", node.var_name, "is not defined")
             raise SyntaxError("Variable not defined")
@@ -201,6 +298,43 @@ class InterpreterType(NodeVisitor):
                     # The variable is not mutable
                     show(colors.CYELLOW, f"Accessing content of variable {node.var_name}", colors.ENDC)
                     return symbol.type
+
+    def visit_FunctionCall(self, node):
+        log("Visiting visit_FunctionCall")
+        log(f"Calling the function {node.var_name} with parameters list {node.arguments_nodes_list}")
+        
+        function_id = node.var_name
+        given_arguments_nodes_list = node.arguments_nodes_list
+
+        # We check the symbol is defined before accessing it
+        if not self.memory_table.isdefined(function_id):
+            raise MemoryError(f"{function_id} is not defined in function call")
+        
+        function_symbol = self.memory_table.get(function_id)
+
+        # We check it's a function and thus a callable object
+        if not function_symbol.symbol_type == "Function":
+            raise SyntaxError(f"function_id is not callable in function call")
+        
+        # We need to check the type of each parameter correspond to the type of arguments given in the call
+        parameters_types_list = function_symbol.parameters_types_list
+
+        if not len(parameters_types_list) == len(given_arguments_nodes_list):
+            raise SyntaxError(f"Invalid arguments given in function call. Expected {len(given_arguments_nodes_list)} arguments got {len(parameters_types_list)}")
+        
+        for i in range(len(parameters_types_list)):
+            expected_parameter_type = parameters_types_list[i]
+            # The actual type is determined by calling visit method on the AST node
+            actual_type_given = self.visit(given_arguments_nodes_list[i])
+
+            # The following comparison check the types match but also
+            # Resolve quote types. See SymbolQuoteType class in baseclass.py
+            if not expected_parameter_type == actual_type_given:
+                raise TypeError("Invalid argument in function call. Expected argument of type {expected_parameter_type} got {actual_type_given}")
+            
+            # The result_type should have been resolved by the previous comparaisons
+            result_type = function_symbol.result_type
+            return result_type
 
     def visit_PrintInt(self, node):
         type = self.visit(node.node)

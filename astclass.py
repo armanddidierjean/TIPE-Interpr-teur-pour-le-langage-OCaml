@@ -114,10 +114,9 @@ class AssignmentStatement(AST):
         self.assignments_list = assignments_list
         self.block_node = block_node
 
-class Assignment(AST):
+class AssignmentVariable(AST):
     """
-    Assignment node
-    Represent an assignment
+    Represent a variable assignment
 
     Attributes
     ----------
@@ -132,6 +131,23 @@ class Assignment(AST):
         self.var_name = var_name
         self.is_ref = is_ref
         self.value_node = value_node
+
+class AssignmentFunction(AST):
+    """
+    Represent a function assignment
+
+    Attributes
+    ----------
+    var_name : string
+        Name of the defined variable
+    content_node : AST node
+        Content of a function, can be an other function or a block
+
+        TODO: rename the attributes
+    """
+    def __init__(self, var_name, content_node):
+        self.var_name = var_name
+        self.content_node = content_node
 
 class Reassignment(AST):
     """
@@ -163,6 +179,22 @@ class Variable(AST):
         self.var_name = var_name
         self.get_content = get_content
         #TODO: créer un AST node pour le point d'exclamation
+
+class FunctionCall(AST):
+    """
+    FunctionCall node
+    It does not represent the function but its result. To access a function symbol, use a variable class.
+    
+    Attributes
+    ----------
+    var_name : string
+        Name of the called function
+    parameters_nodes_list : [AST]
+        List countaining AST nodes of actual parameters or arguments
+    """
+    def __init__(self, var_name, arguments_nodes_list):
+        self.var_name = var_name
+        self.arguments_nodes_list = arguments_nodes_list
 
 class PrintInt(AST):
     """
@@ -226,6 +258,12 @@ class Function(AST):
     content_node : AST node
         Body of the function, can be an other function or a block node
     """
+    def __init__(self, parameters_list, parameters_types_list, function_body_node):
+        self.parameters_list = parameters_list
+        self.parameters_types_list = parameters_types_list
+        self.function_body_node = function_body_node
+    """
     def __init__(self, parameter_id, content_node):
         self.parameter_id = parameter_id
         self.content_node = content_node
+    """

@@ -99,7 +99,7 @@ class Lexer:
             result += self.current_char
             self.advance()
         
-        return Token(FLOAT, int(result))
+        return Token(FLOAT, float(result))
     
     def get_string_token(self):
         """

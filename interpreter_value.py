@@ -27,7 +27,10 @@ class InterpreterValue(NodeVisitor):
         self._init_base_types()
     
     def _init_base_types(self):
-        print("TODO: Initing base type")
+        #TODO: Is this really useful?
+        print("Initing base type")
+        for symbol in BUILTIN_TYPES:
+            self.memory_table.define(symbol.id, symbol)
     
     def interpret(self):
         return self.visit(self.AST_node)
@@ -123,16 +126,48 @@ class InterpreterValue(NodeVisitor):
     
     # WARNING: the following methods need some improvements
 
-    def visit_Assignment(self, node):
-        log("Visiting Assignment")
+    def visit_AssignmentVariable(self, node):
+        log("Visiting AssignmentVariable")
 
         # We don't need to check if the statement is correct as it was done before by the InterpreterType
-        symbol = Symbol(node.var_name, node.is_ref, value=self.visit(node.value_node), type=None)
+        symbol = SymbolVariable(node.var_name, node.is_ref, value=self.visit(node.value_node), type=None)
         # the type is None as we don't use types in InterpreterValue
         
         self.memory_table.define(node.var_name, symbol)
-        show(colors.CYELLOW, f"Assigning: {node.var_name} with type {symbol.type}, isref = {symbol.isref}", colors.ENDC)
+        show(colors.CYELLOW, f"Assigning Variable: {node.var_name} with type {symbol.type}, isref = {symbol.isref}", colors.ENDC)
 
+    def visit_AssignmentFunction(self, node):
+        log("Visiting AssignmentFunction")
+
+        # We don't need to check if the statement is correct as it was done before by the InterpreterType
+        symbol = SymbolFunction(node.var_name, node.is_ref, value=self.visit(node.value_node), type=None)
+        # the type is None as we don't use types in InterpreterValue
+        
+        self.memory_table.define(node.var_name, symbol)
+        show(colors.CYELLOW, f"Assigning Variable: {node.var_name} with type {symbol.type}, isref = {symbol.isref}", colors.ENDC)
+
+    def visit_AssignmentFunction(self, node):
+        log("Visiting AssignmentFunction")
+        # We don't need to check if the statement is correct as it was done before by the InterpreterType
+
+        # Id of the function, used to store it in the memory table
+        function_id = node.var_name
+        # AST node representing the body of the function
+        function_node = node.content_node
+        # List of the parameters id
+        parameters_list = function_node.parameters_list
+
+        # We don't use the types as this was done in interpreter_type
+        parameters_types_list = [None]*len(parameters_list)
+        # The content of the parameters is, at the opposite of the parameters types, a value that 
+        # - do not need to be stored in the symbol as it is not used elsewhere that when the meory table of the function is used
+        # - keep changing and is stored in the function memory table
+
+        function_symbol = SymbolFunction(function_id, parameters_list, [], function_node, result_type=None)
+        
+        self.memory_table.define(function_id, function_symbol)
+        
+        show(colors.CYELLOW, f"Assigning function: {function_id} with parameters: {parameters_list} and function_body_node:{function_node.function_body_node}", colors.ENDC)
 
     def visit_Reassignment(self, node):
         log("Visiting Reassignment")

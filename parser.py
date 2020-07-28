@@ -280,7 +280,7 @@ class Parser:
     
     def assignment(self):
         """
-        ID EQUALS function (-> FUNCTION)
+        ID EQUALS FUNCTION (ID|LPAREN RPAREN)+ ARROW block
         ID EQUALS REF? block
 
         Return assignment node
@@ -294,12 +294,46 @@ class Parser:
         if self.current_token.type == FUNCTION:
             # It's a function declaration
             self.eat(FUNCTION)
+            parameters_list = []
+
+            # We need at least one (ID|LPAREN RPAREN) in the parameters_list.
+            # If we pass the following test, we should have parameters declared
+            if self.current_token.type == ARROW:
+                raise SyntaxError("Expected at least one parameter in the function declaration, got none")
+
+            while self.current_token.type != ARROW:
+                
+                if self.current_token.type == LPAREN:
+                    """LPAREN RPAREN"""
+                    self.eat(LPAREN)
+                    #TODO: Support couples
+                    self.eat(RPAREN)
+                    # It's an unit parameter
+                    # We use the None parameter to represent an UNIT id
+                    parameter_id = None
+                else:
+                    """ID"""
+                    parameter_id = self.current_token.value
+                    self.eat(ID)
+                
+                parameters_list.append(parameter_id)
+
+            self.eat(ARROW)
+
+            # The types are not yet determined
+            parameters_types_list = [None] * len(parameters_list)
+
+            print("searching a function body")
+            function_body_node = self.block()
+
+            function_node = Function(parameters_list, parameters_types_list, function_body_node)
+
             # The function is represented by the Function class.
             # let f = fun a b c -> block 
-            # will be stored as Function(a -> Function(b -> Function(c -> block)))
-            print("searching a function body")
-            block_node = self.function_body()
-            is_ref = False
+            # will be stored as Function(["a", "b", "c"], [None, None, None], block)
+            
+            return AssignmentFunction(var_name, function_node)
+
         else:
             # It's not a function declaration
             # It's then a variable declaration
@@ -310,40 +344,77 @@ class Parser:
                 is_ref = False
         
             block_node = self.block()
+            return AssignmentVariable(var_name, is_ref, block_node)        
 
-        return Assignment(var_name, is_ref, block_node)
+    """
+    # Alternative function déclaration grammar
+    def assignment(self):
+        ""#"
+        ID EQUALS function (-> FUNCTION)
+        ID EQUALS REF? block
+
+        Return assignment node
+        ""#"
+        log("Assignment")
+        var_name = self.current_token.value
+        self.eat(ID)
+
+        self.eat(EQUALS)
+
+        if self.current_token.type == FUNCTION:
+            # It's a function declaration
+            self.eat(FUNCTION)
+            # The function is represented by the Function class.
+            # let f = fun a b c -> block 
+            # will be stored as Function(a -> Function(b -> Function(c -> block)))
+            print("searching a function body")
+            content_node = self.function_body()
+            return AssignmentFunction(var_name, content_node)
+
+        else:
+            # It's not a function declaration
+            # It's then a variable declaration
+            if self.current_token.type == REF:
+                self.eat(REF)
+                is_ref = True
+            else:
+                is_ref = False
+        
+            block_node = self.block()
+            return AssignmentVariable(var_name, is_ref, block_node)        
 
     def function_body(self):
-        """
+        ""#"
         (LPAREN RPAREN)|ID) (ARROW block|function_body)
 
         Return a function node.
         This function allow to use recursion to create the nested Functions nodes
-        """
+        ""#"
         
         if self.current_token.type == LPAREN:
-            """LPAREN RPAREN"""
+            ""#"LPAREN RPAREN""#"
             self.eat(LPAREN)
             #TODO: Support couples
             self.eat(RPAREN)
             # It's an unit parameter
             parameter_id = None
         else:
-            """ID"""
+            ""#"ID""#"
             parameter_id = self.current_token.value
             self.eat(ID)
         
         if self.current_token.type == ARROW:
-            """ARROW block"""
+            ""#"ARROW block""#"
             self.eat(ARROW)
             block_node = self.block()
             return Function(parameter_id, block_node)
 
         else:
-            """function_body"""
+            ""#"function_body""#"
             function_node = self.function_body()
 
             return Function(parameter_id, function_node)
+    """
 
     def variable_statement(self):
         """

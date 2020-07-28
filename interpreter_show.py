@@ -60,8 +60,7 @@ class InterpreterShow(NodeVisitor):
         self.print_ind('Sequence')
         self.print_ind('{')
         self.ind()
-        self.visit(node.node)
-        
+
         for command_node in node.commands_list[:-1]:
             self.visit(command_node)
             self.print_ind('-------')
@@ -109,11 +108,19 @@ class InterpreterShow(NodeVisitor):
         self.deind()
         self.print_ind('}')
 
-    def visit_Assignment(self, node):
-        self.print_ind('Assignment', node.var_name)
+    def visit_AssignmentVariable(self, node):
+        self.print_ind('AssignmentVariable', node.var_name, "isref:", node.isref)
         self.print_ind('{')
         self.ind()
         self.visit(node.value_node)
+        self.deind()
+        self.print_ind('}')
+    
+    def visit_AssignmentFunction(self, node):
+        self.print_ind('AssignmentFunction', node.var_name)
+        self.print_ind('{')
+        self.ind()
+        self.visit(node.content_node)
         self.deind()
         self.print_ind('}')
 
@@ -136,9 +143,14 @@ class InterpreterShow(NodeVisitor):
         
     def visit_PrintInt(self, node):
         self.print_ind('PrintInt')
+        self.print_ind('{')
+        self.ind()
+        self.visit(node.node)
+        self.deind()
+        self.print_ind('}')
     
     def visit_PrintString(self, node):
-        self.print_ind('PreintString')
+        self.print_ind('PrintString')
     
     def visit_Loop(self, node):
         self.print_ind('Loop')
@@ -158,8 +170,21 @@ class InterpreterShow(NodeVisitor):
         self.print_ind('Function')
         self.print_ind('{')
         self.ind()
-        self.print_ind(f"parameter: {node.parameter_id}")
-        self.print_ind('Content')
-        self.visit(node.content_node)
+        self.print_ind(f"parameters_list: {node.parameters_list}")
+        self.print_ind(f"parameters_types_list: {node.parameters_types_list}")
+        self.print_ind('Content function_body_node:')
+        self.visit(node.function_body_node)
+        self.deind()
+        self.print_ind('}')
+    
+    def visit_FunctionCall(self, node):
+        self.print_ind('FunctionCall')
+        self.print_ind('{')
+        self.ind()
+        self.print_ind(f"var-name: {node.var_name}")
+        self.print_ind(f"arguments_nodes_list:")
+        for argument in node.arguments_nodes_list:
+            self.visit(argument)
+            self.print_ind(";")
         self.deind()
         self.print_ind('}')

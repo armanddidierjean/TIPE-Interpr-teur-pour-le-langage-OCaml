@@ -73,3 +73,9 @@ RESERVED_KEYWORDS = {
     'function': Token(FUNCTION, None),
     'fun': Token(FUNCTION, None),
 }
+
+BUILTIN_TYPES = [
+    SymbolType("int"),
+    SymbolType("float"),
+    SymbolType("string"),
+]

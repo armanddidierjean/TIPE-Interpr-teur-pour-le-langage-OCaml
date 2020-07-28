@@ -76,7 +76,7 @@ let i = ref 1 and n = 10
 #text = "let a = ref 6 in 1;;"
 
 #text = "let a = ref 't' in begin a := 'Text'; print_string !a end;;"
-text = "let f = fun a b c -> print_int 4;;"
+text = "let f = fun a b c -> begin print_int 4; print_string b; c+a end in 5;;"
 
 lexer = Lexer(text)
 parser = Parser(lexer)
@@ -85,13 +85,25 @@ node = parser.program()
 interpreter_show = InterpreterShow(node)
 interpreter_show.interpret()
 
-"""
+
 interpreter_type = InterpreterType(node)
 type_res = interpreter_type.interpret()
+
+print(type_res)
+
+"""
 interpreter_value = InterpreterValue(node)
 value_res = interpreter_value.interpret()
 
 print(colors.OKBLUE, "Interpret result:", type_res, "-", value_res, colors.ENDC)
 
-test()
+#test()
 """
+
+# Function declaration
+node = Program(Block(AssignmentStatement([AssignmentFunction("f", Function(["a"], [INT], PrintInt(Num(3, INT))))], Block(Num(4, INT)))))
+# Function declaration and call
+# -> UNIT
+node = Program(Block(AssignmentStatement([AssignmentFunction("f", Function(["a"], [INT], PrintInt(Num(3, INT))))], Block(FunctionCall("f", [Num(1, INT)])))))
+# -> INT
+node = Program(Block(AssignmentStatement([AssignmentFunction("f", Function(["a"], [INT], Num(3, INT)))], Block(FunctionCall("f", [Num(1, INT)])))))
