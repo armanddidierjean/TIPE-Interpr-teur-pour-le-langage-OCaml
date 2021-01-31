@@ -203,6 +203,9 @@ command:    INT
             WHILE block DO block DONE
             PRINT_INT block
             PRINT_STRING block
+            LPAREN RPAREN              => Permet des arguments UNIT (UnitNode) lors des appels de fonction
+                                          Car id cherche des codes et non des block (problème avec 1 + 1)
+                                          LPAREN block RPAREN *should* not happen
             variable_statement         ->(ID|EXCLAMATION)
             nothing
 
@@ -213,9 +216,10 @@ assignment:             ID EQUALS FUNCTION (ID|LPAREN RPAREN)+ ARROW block
 
 variable_statement:     EXCLAMATION ID
                         ID REASSIGN block
-                        ID (block != nothing)*     => Utilisé pour les appels de fonctions : 
-                                                         Pas de block = variable
-                                                         Au moins un block = appel d'une fonction (avec un argument)
+                        ID (code != nothing)*     => Utilisé pour les appels de fonctions : 
+                                                      Pas de code (Nothing node) = variable
+                                                      Au moins un code = appel d'une fonction avec argument
+                                                      On utilise un code et non un bloc suite à un problème pour 1 + 1 interprété comme BinOp(Nothing, +, 1)
 ```
 
 L'utilisation des fonctions `pres0`, `pres1`, `pres2`, `pres3` et `pres4` permet d'associer les éléments selon la précédence des opérateurs. Par exemple `1 + 2 * 2` sera interprété comme `1 + (2 * 2)`.

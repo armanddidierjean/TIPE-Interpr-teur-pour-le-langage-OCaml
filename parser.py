@@ -217,6 +217,9 @@ class Parser:
         | WHILE block DO block DONE
         | PRINT_INT block
         | PRINT_STRING block
+        | LPAREN RPAREN                 => Permet des arguments UNIT (UnitNode) lors des appels de fonction
+                                           Car id cherche des codes et non des block (problème avec 1 + 1)
+                                           LPAREN block RPAREN *should* not happen
         | variable_statement ->(ID|EXCLAMATION)
         | nothing
 
@@ -249,7 +252,12 @@ class Parser:
         elif self.current_token.type == PRINT_STRING:
             """PRINT_STRING block"""
             self.eat(PRINT_STRING)
-            return PrintString(self.block()) 
+            return PrintString(self.block())
+        elif self.current_token.type == LPAREN:
+            print("Finding an UnitNode in code (LPAREN RPAREN), used to be able to use UNIT argument in function call (see comments). LPAREN block RPAREN *should* not happen")
+            self.eat(LPAREN)
+            self.eat(RPAREN)
+            return UnitNode()
         elif self.current_token.type == ID or self.current_token.type == EXCLAMATION:
             """variable_statement ->(ID|EXCLAMATION)"""
             return self.variable_statement()
@@ -446,7 +454,7 @@ class Parser:
             return Variable(var_id, get_content=True)
         
         """ID REASSIGN block
-         | ID (block != nothing)*"""
+         | ID (code != nothing)*"""
         var_id = self.current_token.value
         self.eat(ID)
 
@@ -455,7 +463,7 @@ class Parser:
             self.eat(REASSIGN)
             return Reassignment(var_id, self.block())
         else:
-            """ID (block != nothing)*"""
+            """ID (code != nothing)*"""
             arguments_nodes_list = []
 
             print(colors.FAIL, "STARTING BLOCK", colors.ENDC)
@@ -463,8 +471,8 @@ class Parser:
             following_block = self.code()       
 
             # WARNING block() is not transparent
-            # following_block is a block node
-            # We need to check is the content of the block node is or not a NothingClass
+            # if following_block is a block node we need to get the node it contains
+            # because we need to check whether the content of the block node is or not a NothingClass
             if type(following_block).__name__ == "Block":
                 print("Opening block node in id check")
                 following_block_node_content = following_block.node
@@ -474,14 +482,14 @@ class Parser:
             
             while not type(following_block_node_content).__name__ == "NothingClass":
                 arguments_nodes_list.append(following_block)
-                print(colors.FAIL, "CONTINUE BLOCK", type(following_block_node_content).__name__, colors.ENDC)
+                print(colors.FAIL, "CONTINUE FINDING BLOCK in id check (function or variable) ", type(following_block_node_content).__name__, colors.ENDC)
                 following_block = self.code()
 
                 if type(following_block).__name__ == "Block":
-                    print("Opening block node in id check")
+                    print("Opening block node in id check (function or variable) OK")
                     following_block_node_content = following_block.node
                 else:
-                    print("Not a block node in id check")
+                    print("It was not a block node in id check (function or variable) OK")
                     following_block_node_content = following_block
             
             # We can now determine if the syntax was a function call or a variable access
