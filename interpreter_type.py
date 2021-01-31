@@ -357,5 +357,15 @@ class InterpreterType(NodeVisitor):
             warning(f"Block node is of type {block_type} instead of UNIT in Loop")
         return UNIT
     
+    def visit_ConditionalStatement(self, node):
+        condition_type = self.visit(node.condition_node)
+        if condition_type != BOOL:
+            error(f"Condition_node is of type {condition_type} instead of BOOL in ConditionalStatement")
+        then_type = self.visit(node.then_node)
+        else_type = self.visit(node.else_node)
+        if then_type != else_type:
+            error(f"Two then block is of type {then_type} but else block of type {else_type} in ConditionalStatement")
+        return then_type
+    
     def visit_UnitNode(self, node):
         return UNIT

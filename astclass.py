@@ -239,6 +239,25 @@ class Loop(AST):
         self.boolean_node = boolean_node
         self.block_node = block_node
 
+class ConditionalStatement(AST):
+    """
+    Conditional statements node
+    Represent an IF THEN ELSE statement
+
+    Attributes
+    ----------
+    condition_node : AST node of type BOOL
+        Node of the condition of statement
+    then_node : AST node
+        Executed code if the condition is true
+    else_node : AST node
+        Executed code if the condition is false
+    """
+    def __init__(self, condition_node, then_node, else_node):
+        self.condition_node = condition_node
+        self.then_node = then_node
+        self.else_node = else_node
+
 class UnitNode(AST):
     """
     UnitNode node

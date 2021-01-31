@@ -162,7 +162,20 @@ class InterpreterShow(NodeVisitor):
         self.visit(node.block_node)
         self.deind()
         self.print_ind('}')
-        
+
+    def visit_ConditionalStatement(self, node):
+        self.print_ind('ConditionalStatement')
+        self.print_ind('{')
+        self.ind()
+        self.print_ind('Condition')
+        self.visit(node.condition_node)
+        self.print_ind('Then')
+        self.visit(node.then_node)
+        self.print_ind('Else')
+        self.visit(node.else_node)
+        self.deind()
+        self.print_ind('}')
+
     def visit_UnitNode(self, node):
         self.print_ind('UnitNode')
     def NothingClass(self, node):

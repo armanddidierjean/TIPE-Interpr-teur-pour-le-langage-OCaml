@@ -49,6 +49,9 @@ WHILE = 'WHILE'
 DO = 'DO'
 DONE = 'DONE'
 FUNCTION = 'FUNCTION'
+IF = 'IF'
+THEN = 'THEN'
+ELSE = 'ELSE'
 
 ############### Types ###############
 INT = 'INT'
@@ -72,6 +75,9 @@ RESERVED_KEYWORDS = {
     'print_string': Token(PRINT_STRING, None),
     'function': Token(FUNCTION, None),
     'fun': Token(FUNCTION, None),
+    'if': Token(IF, None),
+    'then': Token(THEN, None),
+    'else': Token(ELSE, None),
 }
 
 BUILTIN_TYPES = [

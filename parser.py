@@ -215,6 +215,7 @@ class Parser:
         | STRING
         | assignment_statement ->(LET)
         | WHILE block DO block DONE
+        | IF block THEN block (ELSE block)?
         | PRINT_INT block
         | PRINT_STRING block
         | LPAREN RPAREN                 => Permet des arguments UNIT (UnitNode) lors des appels de fonction
@@ -245,6 +246,21 @@ class Parser:
             self.eat(DONE)
             log(f"Returning a Loop node boolean_node={boolean_node}, block_node={block_node}")
             return Loop(boolean_node, block_node)
+        elif self.current_token.type == IF:
+            """IF block THEN block (ELSE block)?"""
+            self.eat(IF)
+            condition_node = self.block()
+
+            self.eat(THEN)
+            then_node = self.block()
+
+            if self.current_token.type == ELSE:
+                self.eat(ELSE)
+                else_node = self.block()
+            else:
+                else_node = UnitNode()
+            
+            return ConditionalStatement(condition_node, then_node, else_node)
         elif self.current_token.type == PRINT_INT:
             """PRINT_INT block"""
             self.eat(PRINT_INT)

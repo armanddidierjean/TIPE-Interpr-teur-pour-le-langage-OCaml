@@ -208,6 +208,7 @@ command:    INT
             STRING
             assignment_statement       ->(LET)
             WHILE block DO block DONE
+            IF block THEN block (ELSE block)?
             PRINT_INT block
             PRINT_STRING block
             LPAREN RPAREN              => Permet des arguments UNIT (UnitNode) lors des appels de fonction

@@ -248,5 +248,11 @@ class InterpreterValue(NodeVisitor):
         while self.visit(node.boolean_node):
             self.visit(node.block_node)
     
+    def visit_ConditionalStatement(self, node):
+        if self.visit(node.condition_node):
+            return self.visit(node.then_node)
+        else:
+            return self.visit(node.else_node)
+    
     def visit_UnitNode(self, node):
         return None
