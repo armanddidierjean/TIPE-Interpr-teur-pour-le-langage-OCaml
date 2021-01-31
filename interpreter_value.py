@@ -163,7 +163,7 @@ class InterpreterValue(NodeVisitor):
         # - do not need to be stored in the symbol as it is not used elsewhere that when the meory table of the function is used
         # - keep changing and is stored in the function memory table
 
-        function_symbol = SymbolFunction(function_id, parameters_list, [], function_node, result_type=None)
+        function_symbol = SymbolFunction(function_id, parameters_list, [], function_body_node=function_node.function_body_node, result_type=None)
         
         self.memory_table.define(function_id, function_symbol)
         
@@ -194,6 +194,49 @@ class InterpreterValue(NodeVisitor):
             else:
                 # The variable isn't mutable
                 return symbol.value
+
+    def visit_FunctionCall(self, node):
+        log("Visiting visit_FunctionCall")
+        log(f"Calling the function {node.var_name} with parameters list {node.arguments_nodes_list}")
+        
+        function_id = node.var_name
+
+        # We don't need to check if the function is already defined or is indeed a function.
+        # We don't need to check the amount of arguments/parameters is the same
+        # It was done in InterpreterType
+        function_symbol = self.memory_table.get(function_id)
+        
+        # List of the id of the expected arguments
+        parameters_list = function_symbol.parameters_list
+        # List of the arguments that were passed in the call
+        given_arguments_nodes_list = node.arguments_nodes_list
+
+        # 1 We create a new memory table
+        mt = MemoryTable(function_id, self.memory_table.scope_level + 1, self.memory_table)
+        
+        # 2 We define each parameter with its given as argument value
+        for i in range(len(parameters_list)): 
+            parameter_id = parameters_list[i]
+            argument_node = given_arguments_nodes_list[i]
+
+            # We get its value by visiting its node
+            argument_value = self.visit(argument_node)
+
+            argument_symbol = SymbolVariable(parameter_id, isref=False, value=argument_value, type=None)
+
+            mt.define(parameter_id, argument_symbol)
+
+        # 3 We use this memory table
+        self.memory_table = mt
+
+        # 4 We can then execute the body of the function
+        function_body_node = function_symbol.function_body_node
+        print("Visiting function body node")
+        function_result = self.visit(function_body_node)
+
+        # 5 We restore the old memory table and return the result
+        self.memory_table = self.memory_table.following_table
+        return function_result
 
     def visit_PrintInt(self, node):
         print(colors.BOLD, self.visit(node.node), colors.ENDC)

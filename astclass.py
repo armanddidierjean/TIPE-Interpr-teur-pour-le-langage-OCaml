@@ -246,6 +246,12 @@ class UnitNode(AST):
     """
     pass
 
+class NothingClass(AST):
+    """
+    Used to detect empty blocks
+    """
+    pass
+
 class Function(AST):
     """
     Node used to store a function declaration

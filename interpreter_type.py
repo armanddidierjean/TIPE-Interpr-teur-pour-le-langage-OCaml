@@ -330,11 +330,11 @@ class InterpreterType(NodeVisitor):
             # The following comparison check the types match but also
             # Resolve quote types. See SymbolQuoteType class in baseclass.py
             if not expected_parameter_type == actual_type_given:
-                raise TypeError("Invalid argument in function call. Expected argument of type {expected_parameter_type} got {actual_type_given}")
+                raise TypeError(f"Invalid argument in function call. Expected argument of type {expected_parameter_type} got {actual_type_given}")
             
-            # The result_type should have been resolved by the previous comparaisons
-            result_type = function_symbol.result_type
-            return result_type
+        # The result_type should have been resolved by the previous comparaisons
+        result_type = function_symbol.result_type
+        return result_type
 
     def visit_PrintInt(self, node):
         type = self.visit(node.node)

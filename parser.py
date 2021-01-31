@@ -215,7 +215,8 @@ class Parser:
         | WHILE block DO block DONE
         | PRINT_INT block
         | PRINT_STRING block
-        | variable_statement
+        | variable_statement ->(ID|EXCLAMATION)
+        | nothing
 
         DO NOT RETURN HIS OWN NODE
         """
@@ -223,6 +224,7 @@ class Parser:
         if self.current_token.type in (INT, FLOAT, STRING):
             """INT | FLOAT | STRING"""
             node = Num(self.current_token.value, self.current_token.type)
+            print("NUM:", self.current_token.value, self.current_token.type)
             log("Command is eating a self type (should be a num):", self.current_token)
             self.eat(self.current_token.type)
             return node
@@ -246,9 +248,14 @@ class Parser:
             """PRINT_STRING block"""
             self.eat(PRINT_STRING)
             return PrintString(self.block()) 
-        else:
-            """variable_statement"""
+        elif self.current_token.type == ID or self.current_token.type == EXCLAMATION:
+            """variable_statement ->(ID|EXCLAMATION)"""
             return self.variable_statement()
+        else:
+            """nothing"""
+            # The nothing command is used to determine the end of a function call
+            # TODO: Improve class distinction NothingClass/UnitNode
+            return NothingClass()
 
     def assignment_statement(self):
         """
@@ -420,7 +427,12 @@ class Parser:
         """
           EXCLAMATION ID
         | ID REASSIGN block
-        | ID
+        | ID (block != nothing)*        => Utilisé pour les appels de fonctions : 
+                                            Pas de block = variable
+                                            Au moins un block = appel d'une fonction (avec un argument)
+
+        # If there is no block then it's a variable
+        # Else it's a function call
         """
         log("Variable Statement")
 
@@ -432,7 +444,7 @@ class Parser:
             return Variable(var_id, get_content=True)
         
         """ID REASSIGN block
-         | ID               """
+         | ID (block != nothing)*"""
         var_id = self.current_token.value
         self.eat(ID)
 
@@ -441,5 +453,39 @@ class Parser:
             self.eat(REASSIGN)
             return Reassignment(var_id, self.block())
         else:
-            """ID"""
-            return Variable(var_id, get_content=False)
+            """ID (block != nothing)*"""
+            arguments_nodes_list = []
+
+            print(colors.FAIL, "STARTING BLOCK", colors.ENDC)
+            #following_block = self.block()     # Issue a + 2 is interpreted as ID BinOp(Nothing, PLUS, 2)
+            following_block = self.code()       
+
+            # WARNING block() is not transparent
+            # following_block is a block node
+            # We need to check is the content of the block node is or not a NothingClass
+            if type(following_block).__name__ == "Block":
+                print("Opening block node in id check")
+                following_block_node_content = following_block.node
+            else:
+                print("Not a block node in id check")
+                following_block_node_content = following_block
+            
+            while not type(following_block_node_content).__name__ == "NothingClass":
+                arguments_nodes_list.append(following_block)
+                print(colors.FAIL, "CONTINUE BLOCK", type(following_block_node_content).__name__, colors.ENDC)
+                following_block = self.code()
+
+                if type(following_block).__name__ == "Block":
+                    print("Opening block node in id check")
+                    following_block_node_content = following_block.node
+                else:
+                    print("Not a block node in id check")
+                    following_block_node_content = following_block
+            
+            # We can now determine if the syntax was a function call or a variable access
+            if len(arguments_nodes_list) == 0:
+                # It's a variable call. (The variable can be a function but it will not be executed)
+                return Variable(var_id, get_content=False)
+            else:
+                # It's a function call
+                return FunctionCall(var_id, arguments_nodes_list)
