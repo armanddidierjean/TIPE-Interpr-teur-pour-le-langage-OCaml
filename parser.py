@@ -67,6 +67,8 @@ class Parser:
             self.eat(LPAREN)
             """LPAREN RPAREN"""
             if self.current_token.type == RPAREN:
+                log("This block is a UnitNode")
+                self.eat(RPAREN)
                 return UnitNode()
             """LPAREN block RPAREN"""
             node = self.block()
