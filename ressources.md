@@ -182,7 +182,8 @@ Problème : l'operation 2 * 2 + 2 était associée comme ceci : 2 * (2 + 2) ou (
 ```EBNF
 program:    block? SEMI SEMI
 
-block:      LPAREN block? RPAREN
+block:      # TODO: Remove @LPARENRPAREN
+            #LPAREN block? RPAREN
             pres0
 
 pres0:      PLUS block
@@ -197,7 +198,10 @@ pres3:      pres4 (EQUAL | DIFFERENT) pres4
 
 pres4:      code ((BOOLEANCONJUNCTION | BOOLEANDISJUNCTION) code)*
 
-code:       sequence    ->(BEGIN)
+code:       LPAREN block? RPAREN                            => On vérifie l'absence de RPAREN avant de chercher le block 
+                                                               LPAREN RPAREN doit renvoyer UnitNode
+                                                               block() renverra NothingNode
+            sequence    ->(BEGIN)
             command
 
 sequence:   BEGIN END
@@ -211,9 +215,10 @@ command:    INT
             IF block THEN block (ELSE block)?
             PRINT_INT block
             PRINT_STRING block
-            LPAREN RPAREN              => Permet des arguments UNIT (UnitNode) lors des appels de fonction
-                                          Car id cherche des codes et non des block (problème avec 1 + 1)
-                                          LPAREN block RPAREN *should* not happen
+            # TODO: REMOVE @LPARENRPAREN
+            #LPAREN RPAREN              => Permet des arguments UNIT (UnitNode) lors des appels de fonction
+            #                              Car id cherche des codes et non des block (problème avec 1 + 1)
+            #                              LPAREN block RPAREN *should* not happen
             variable_statement         ->(ID|EXCLAMATION)
             nothing
 

@@ -57,25 +57,30 @@ class Parser:
     
     def block(self):
         """
-          LPAREN block? RPAREN
+          # TODO: Remove @LPARENRPAREN
+          #LPAREN block? RPAREN
         | pres0
 
         USED FOR A BINOP
         """
         log("Block")
-        if self.current_token.type == LPAREN:
-            self.eat(LPAREN)
-            """LPAREN RPAREN"""
-            if self.current_token.type == RPAREN:
-                log("This block is a UnitNode")
-                self.eat(RPAREN)
-                return UnitNode()
-            """LPAREN block RPAREN"""
-            node = self.block()
-            self.eat(RPAREN)
-            return node
-        else:
-            return self.pres0()
+        
+        # Removed to put LPAREN block? RPAREN in code
+        # TODO: should work without. Remove this code Remove @LPARENRPAREN
+        #if self.current_token.type == LPAREN:
+        #    self.eat(LPAREN)
+        #    """LPAREN RPAREN"""
+        #    if self.current_token.type == RPAREN:
+        #        log("This block is a UnitNode")
+        #        self.eat(RPAREN)
+        #        return UnitNode()
+        #    """LPAREN block RPAREN"""
+        #    node = self.block()
+        #    self.eat(RPAREN)
+        #    return node
+        #else:
+        #    return self.pres0()
+        return self.pres0()
 
     def pres0(self):
         """
@@ -173,15 +178,26 @@ class Parser:
     
     def code(self):
         """
-          sequence      -> (BEGIN)
+          LPAREN block? RPAREN                            => On vérifie l'absence de RPAREN avant de chercher le block 
+                                                               LPAREN RPAREN doit renvoyer UnitNode
+                                                               block() renverra NothingNode
+        | sequence      -> (BEGIN)
         | command
         """
         log("Code")
-        if self.current_token.type == BEGIN:
+        if self.current_token.type == LPAREN:
+            self.eat(LPAREN)
+            if self.current_token.type == RPAREN:
+                node = UnitNode()
+            else:
+                node = self.block()
+            self.eat(RPAREN)
+        elif self.current_token.type == BEGIN:
             node = self.sequence()
         else:
             node = self.command()
         
+        # TODO: remove Block(node) to use only node
         return Block(node)
 
     def sequence(self):
@@ -218,9 +234,10 @@ class Parser:
         | IF block THEN block (ELSE block)?
         | PRINT_INT block
         | PRINT_STRING block
-        | LPAREN RPAREN                 => Permet des arguments UNIT (UnitNode) lors des appels de fonction
-                                           Car id cherche des codes et non des block (problème avec 1 + 1)
-                                           LPAREN block RPAREN *should* not happen
+        #TODO: REMOVE @LPARENRPAREN
+        #| LPAREN RPAREN                 => Permet des arguments UNIT (UnitNode) lors des appels de fonction
+        #                                   Car id cherche des codes et non des block (problème avec 1 + 1)
+        #                                   LPAREN block RPAREN *should* not happen
         | variable_statement ->(ID|EXCLAMATION)
         | nothing
 
@@ -269,11 +286,12 @@ class Parser:
             """PRINT_STRING block"""
             self.eat(PRINT_STRING)
             return PrintString(self.block())
-        elif self.current_token.type == LPAREN:
-            print("Finding an UnitNode in code (LPAREN RPAREN), used to be able to use UNIT argument in function call (see comments). LPAREN block RPAREN *should* not happen")
-            self.eat(LPAREN)
-            self.eat(RPAREN)
-            return UnitNode()
+        # TODO: Remove @LPARENRPAREN
+        #elif self.current_token.type == LPAREN:
+        #    print("Finding an UnitNode in code (LPAREN RPAREN), used to be able to use UNIT argument in function call (see comments). LPAREN block RPAREN *should* not happen")
+        #    self.eat(LPAREN)
+        #    self.eat(RPAREN)
+        #    return UnitNode()
         elif self.current_token.type == ID or self.current_token.type == EXCLAMATION:
             """variable_statement ->(ID|EXCLAMATION)"""
             return self.variable_statement()
