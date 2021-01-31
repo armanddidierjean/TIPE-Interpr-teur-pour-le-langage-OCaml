@@ -56,6 +56,10 @@ text = "f 1 3 2;;"
 
 text = "let f = fun a b c -> begin print_int 4; print_string b; c+a end in f 3 'TEXT' 3;;"
 
+text = "let f = fun a b () -> 1 in f 1 't' ();;"
+
+text = "let f = fun a () c -> 1 in f 1 () 1;;"
+
 lexer = Lexer(text)
 parser = Parser(lexer)
 node = parser.program()

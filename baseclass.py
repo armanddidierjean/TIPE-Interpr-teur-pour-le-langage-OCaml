@@ -252,7 +252,6 @@ class MemoryTable(object):
         for obj_id in self._memory.keys():
             text += str(obj_id) + ": " + str(self._memory[obj_id]) + "\n"
         
-        
 
         text += "\n============\n\n"
 

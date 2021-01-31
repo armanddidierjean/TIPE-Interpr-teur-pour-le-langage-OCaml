@@ -249,6 +249,7 @@ class UnitNode(AST):
 class NothingClass(AST):
     """
     Used to detect empty blocks
+    Tool class: It does not represent OCaml code but is used by the interpreter to detect empty block
     """
     pass
 

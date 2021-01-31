@@ -9,13 +9,13 @@ class colors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
-LOG_INFO = False
+LOG_INFO = True
 
 def log(*arg):
     if LOG_INFO:
         print(*arg)
 
-SHOW_INFO = False
+SHOW_INFO = True
 
 def show(*arg):
     if SHOW_INFO:
@@ -27,4 +27,4 @@ def warning(*arg):
         print(colors.WARNING, *arg, colors.ENDC)
 
 def error(*arg):
-    print(colors.FAIL, *arg, colors.ENDC)
+    print(colors.FAIL, *arg, colors.ENDC, sep='\n')

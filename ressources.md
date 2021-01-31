@@ -84,9 +84,16 @@ Vert : propre à ce projet
     - Fibonacci
     - FAIRE DE LA PROGRAMMATION DYNAMIQUE
 
- * Lire la liste des chapitre utiles https://compilers.iecc.com/crenshaw/tutor1.txt
+ * Lire la liste des chapitres utiles https://compilers.iecc.com/crenshaw/tutor1.txt
 
  * Générer du langage machine
+
+ * Expliquer la stratégie de programmation
+    - Choix de Python comme langage de base
+    - Choix de OCaml comme langage à interpréter
+    - Utilisation de POO pour avoir des modules indépendant
+    - Utilisation de GIT pour le visionnement du projet
+    - Création de tests dès le debut du projet : "integration test"
 
 
 -----
