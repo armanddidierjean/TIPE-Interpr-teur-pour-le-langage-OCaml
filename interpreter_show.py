@@ -109,7 +109,7 @@ class InterpreterShow(NodeVisitor):
         self.print_ind('}')
 
     def visit_AssignmentVariable(self, node):
-        self.print_ind('AssignmentVariable', node.var_name, "isref:", node.isref)
+        self.print_ind('AssignmentVariable', node.var_name, "isref:", node.is_ref)
         self.print_ind('{')
         self.ind()
         self.visit(node.value_node)
@@ -128,12 +128,12 @@ class InterpreterShow(NodeVisitor):
         self.print_ind('Reassignment', node.var_name)
         self.print_ind('{')
         self.ind()
-        self.visit(node.value_node)
+        self.visit(node.new_value_node)
         self.deind()
         self.print_ind('}')
         
     def visit_Variable(self, node):
-        self.print_ind('Reassignment', node.var_name)
+        self.print_ind('Variable', node.var_name)
         self.print_ind('{')
         self.ind()
         self.print_ind(node.var_name, "getcontent", node.get_content)
@@ -165,6 +165,8 @@ class InterpreterShow(NodeVisitor):
         
     def visit_UnitNode(self, node):
         self.print_ind('UnitNode')
+    def NothingClass(self, node):
+        self.print_ind('NothingClass')
     
     def visit_Function(self, node):
         self.print_ind('Function')
@@ -173,7 +175,9 @@ class InterpreterShow(NodeVisitor):
         self.print_ind(f"parameters_list: {node.parameters_list}")
         self.print_ind(f"parameters_types_list: {node.parameters_types_list}")
         self.print_ind('Content function_body_node:')
+        self.ind()
         self.visit(node.function_body_node)
+        self.deind()
         self.deind()
         self.print_ind('}')
     
@@ -183,8 +187,10 @@ class InterpreterShow(NodeVisitor):
         self.ind()
         self.print_ind(f"var-name: {node.var_name}")
         self.print_ind(f"arguments_nodes_list:")
+        self.ind()
         for argument in node.arguments_nodes_list:
             self.visit(argument)
             self.print_ind(";")
+        self.deind()
         self.deind()
         self.print_ind('}')

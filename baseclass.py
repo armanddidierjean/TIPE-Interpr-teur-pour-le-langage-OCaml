@@ -111,13 +111,14 @@ class SymbolQuoteType(Symbol):
 
     def __eq__(self, other):
         if self.resolved_type is None:
-            print("Comparing resolved")
+            # The type is unresolved
+            print("Comparing unresolved", self, other)
             # We can now resolve the two elements
             self.resolved_type = other
             return True
         else:
-            print("Comparing unresolved")
-            # The type is already resolved. We then need to 
+            print("Comparing resolved", self, other)
+            # The type is already resolved. We then need to compare the real type and the other type
             return self.resolved_type == other
     
     def __str__(self):
@@ -233,6 +234,12 @@ class MemoryTable(object):
         
     def __str__(self):
         text = "\n\n"
+
+        text += "Following table:\n"
+        text += "----------------\n"
+
+        text += self.following_table.__str__()
+
         text += "Memory Table\n"
         text += "============\n"
         text += "scope_name: " + str(self.scope_name) + '\n'
@@ -245,11 +252,7 @@ class MemoryTable(object):
         for obj_id in self._memory.keys():
             text += str(obj_id) + ": " + str(self._memory[obj_id]) + "\n"
         
-        text += "\n"
-        text += "Following table:\n"
-        text += "----------------\n"
-
-        text += self.following_table.__str__()
+        
 
         text += "\n============\n\n"
 

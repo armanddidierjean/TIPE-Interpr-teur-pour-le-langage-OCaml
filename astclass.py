@@ -263,6 +263,9 @@ class Function(AST):
         Can be none if the parameter is unit
     content_node : AST node
         Body of the function, can be an other function or a block node
+    TODO: change
+
+    WARNING THERE IS NO VISIT FUNCTION METHOD ???
     """
     def __init__(self, parameters_list, parameters_types_list, function_body_node):
         self.parameters_list = parameters_list
