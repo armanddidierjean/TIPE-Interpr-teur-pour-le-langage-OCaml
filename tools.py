@@ -22,9 +22,25 @@ def show(*arg):
         print(*arg)
 
 SHOW_WARNING = True
+
 def warning(*arg):
     if SHOW_WARNING:
         print(colors.WARNING, *arg, colors.ENDC)
 
+
+# Errors are pushed to the pile so they can be listed by the tests command
+class ErrorsManager():
+    def __init__(self):
+        self.errorsPile = []
+    def empty(self):
+        self.errorsPile = []
+    def extend(self, list):
+        self.errorsPile.extend(list)
+    def get(self):
+        return self.errorsPile
+
+errorsManager = ErrorsManager()
+
 def error(*arg):
+    errorsManager.extend(arg)
     print(colors.FAIL, *arg, colors.ENDC, sep='\n')

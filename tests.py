@@ -19,37 +19,57 @@ def test():
         (6, "let a = 'text' in let a = 3 in a;;", INT, 3),
         (7, "let f = fun a b c -> begin print_int 4; print_string b; c+a end in f 3 'TEXT' 3;;", INT, 6),
         (8, "let f = fun a b () -> 1 in f 1 't' ();;", INT, 1),
-        (9, "();;", UNIT, None)
+        (9, "();;", UNIT, None),
+        (10, "1 + 2 * (1 + 1) * 3;;", INT, 13),
     ]
     # Liste des erreurs rencontrées
     errors_list = []
+    # UNIT testing: on vérifie que le code est compilable
+    # INTEGRATION testing on vérifie que le résultat est correct
+    errorsManager.empty()
     for id, texte, type_expected, value_expected in tests_list:
+
         lexer = Lexer(texte)
         parser = Parser(lexer)
         node = parser.program()
 
-        print(" * Test", id)
+        # Gestion des erreurs de parsing
+        for errorItem in errorsManager.get():
+            errors_list.append(f"#{id} parse error: {errorItem}")
+        errorsManager.empty()
 
         interpreter_type = InterpreterType(node)
         type_res = interpreter_type.interpret()
 
+        # Gestion des erreurs de l'interpreteur de type
+        for errorItem in errorsManager.get():
+            errors_list.append(f"#{id} interpreter type error: {errorItem}")
+        errorsManager.empty()
+
         interpreter_value = InterpreterValue(node)
         value_res = interpreter_value.interpret()
 
+        # Gestion des erreurs de l'interpreteur de valeur
+        for errorItem in errorsManager.get():
+            errors_list.append(f"#{id} interpreter value error: {errorItem}")
+        errorsManager.empty()
+
+        # Gestion des erreurs de type et valeur du résultat
         if type_expected != type_res:
             errors_list.append(f"#{id} types error: got {type_res} instead of {type_expected}")
         if value_expected != value_res:
             errors_list.append(f"#{id} value error: got {value_res} instead of {value_expected}")
+        
     if len(errors_list) == 0:
-        print(colors.OKGREEN, "┌────────────────────┐")
-        print(f" │ Running tests:     │")
+        print(colors.OKGREEN, "┌──────────────────────┐")
+        print(f" │ Running tests:       │")
         print(f" │                {len(tests_list)}/{len(tests_list)} │")
-        print(" └────────────────────┘", colors.ENDC)
+        print(" └──────────────────────┘", colors.ENDC)
     else:
-        print(colors.FAIL, "┌────────────────────┐")
-        print(f" │ Running tests:     │")
+        print(colors.FAIL, "┌──────────────────────┐")
+        print(f" │ Running tests:       │")
         print(f" │                {len(tests_list) - len(errors_list)}/{len(tests_list)} │")
-        print(" └────────────────────┘", colors.ENDC)
+        print(" └──────────────────────┘", colors.ENDC)
         error(*errors_list)
 
 test()
