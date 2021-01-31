@@ -84,25 +84,26 @@ sequence:   BEGIN END
 command:    INT
             FLOAT
             STRING
-            assignment_statement ->(LET)
+            assignment_statement       ->(LET)
             WHILE block DO block DONE
             PRINT_INT block
             PRINT_STRING block
-            variable_statement
+            variable_statement         ->(ID|EXCLAMATION)
+            nothing
 
 assignment_statement:   LET assignment (AND assignment)* IN block
 
-assignment:             ID EQUALS FUNCTION function_body
+assignment:             ID EQUALS FUNCTION (ID|LPAREN RPAREN)+ ARROW block
                         ID EQUALS REF? block
-
-function_body:          (LPAREN RPAREN)|ID) (ARROW block|function_body)
 
 variable_statement:     EXCLAMATION ID
                         ID REASSIGN block
-                        ID
+                        ID (block != nothing)*     => Utilisé pour les appels de fonctions : 
+                                                         Pas de block = variable
+                                                         Au moins un block = appel d'une fonction (avec un argument)
 ```
 
-L'utilisation des fonctions `pres0`, `pres1`, `pres2`, `pres3` et `pres4` permet d'associer les éléments selon la précédence des opérateurs. Par exemple `1 + 2 * 2` sera interpreté comme `1 + (2 * 2)`.
+L'utilisation des fonctions `pres0`, `pres1`, `pres2`, `pres3` et `pres4` permet d'associer les éléments selon la précédence des opérateurs. Par exemple `1 + 2 * 2` sera interprété comme `1 + (2 * 2)`.
 
 ## Precédence des opérateurs
 Par ordre décroissant de précédence :
