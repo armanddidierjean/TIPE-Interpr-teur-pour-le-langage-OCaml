@@ -223,9 +223,10 @@ command:    INT
             nothing
 
 assignment_statement:   LET assignment (AND assignment)* IN block
+                        LET assignment (AND assignment)*                            => TODO: to implement
 
-assignment:             ID EQUALS FUNCTION (ID|LPAREN RPAREN)+ ARROW block
-                        ID EQUALS REF? block
+assignment:             REC? ID EQUALS FUNCTION (ID|LPAREN RPAREN)+ ARROW block
+                        REC? ID EQUALS REF? block                                   => The REC won't be used nor raise an error
 
 variable_statement:     EXCLAMATION ID
                         ID REASSIGN block

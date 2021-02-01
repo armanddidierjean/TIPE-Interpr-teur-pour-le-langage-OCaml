@@ -136,6 +136,7 @@ class InterpreterValue(NodeVisitor):
         self.memory_table.define(node.var_name, symbol)
         show(colors.CYELLOW, f"Assigning Variable: {node.var_name} with type {symbol.type}, isref = {symbol.isref}", colors.ENDC)
 
+    """ TODO: remove
     def visit_AssignmentFunction(self, node):
         log("Visiting AssignmentFunction")
 
@@ -145,6 +146,7 @@ class InterpreterValue(NodeVisitor):
         
         self.memory_table.define(node.var_name, symbol)
         show(colors.CYELLOW, f"Assigning Variable: {node.var_name} with type {symbol.type}, isref = {symbol.isref}", colors.ENDC)
+    """
 
     def visit_AssignmentFunction(self, node):
         log("Visiting AssignmentFunction")
@@ -163,7 +165,7 @@ class InterpreterValue(NodeVisitor):
         # - do not need to be stored in the symbol as it is not used elsewhere that when the meory table of the function is used
         # - keep changing and is stored in the function memory table
 
-        function_symbol = SymbolFunction(function_id, parameters_list, [], function_body_node=function_node.function_body_node, result_type=None)
+        function_symbol = SymbolFunction(function_id, parameters_list, [], function_body_node=function_node.function_body_node, result_type=None, is_recursive=node.is_recursive)
         
         self.memory_table.define(function_id, function_symbol)
         
@@ -225,16 +227,20 @@ class InterpreterValue(NodeVisitor):
             argument_symbol = SymbolVariable(parameter_id, isref=False, value=argument_value, type=None)
 
             mt.define(parameter_id, argument_symbol)
+        
+        # 3 If the function is recursive, we add this function as an object of its own memory table
+        if function_symbol.is_recursive:
+            mt.define(function_id, function_symbol)
 
-        # 3 We use this memory table
+        # 4 We use this memory table
         self.memory_table = mt
 
-        # 4 We can then execute the body of the function
+        # 5 We can then execute the body of the function
         function_body_node = function_symbol.function_body_node
         print("Visiting function body node")
         function_result = self.visit(function_body_node)
 
-        # 5 We restore the old memory table and return the result
+        # 6 We restore the old memory table and return the result
         self.memory_table = self.memory_table.following_table
         return function_result
 

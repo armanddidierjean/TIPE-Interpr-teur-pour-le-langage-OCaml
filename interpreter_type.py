@@ -183,6 +183,9 @@ class InterpreterType(NodeVisitor):
             # 2 We create a new memory table for the function body, it will be used to determine parameters type
             mt = MemoryTable(function_id, self.memory_table.scope_level + 1, self.memory_table)
             
+            # List of currently quote types passed for the recursive definition of the function
+            # TODO: improve this system
+            rec_param_type_list = []
 
             for parameter_id in parameters_list:
                 # We add each parameters to the memory table
@@ -191,6 +194,10 @@ class InterpreterType(NodeVisitor):
                     # The parameter can be an UNIT parameter. 
                     # We don't need to add it to the memory table
                     # This happen for example when we declare `let f = fun () -> 1`
+
+                    # We add the type of the parameter to the list
+                    rec_param_type_list.append(UNIT)
+
                     pass
                 else:
                     quote_symbol = SymbolQuoteType(chr(ord("a")+self.quote_index), resolved_type=None)
@@ -198,7 +205,21 @@ class InterpreterType(NodeVisitor):
                     # self.quote_index contain the index of the next to use quote position character
                     
                     parameter_symbol = SymbolVariable(parameter_id, isref=False, value=None, type=quote_symbol)
+
+                    # We add the current type of the parameter to the list
+                    rec_param_type_list.append(quote_symbol)
+                    
                     mt.define(parameter_id, parameter_symbol)
+            
+            if node.is_recursive:
+                # We add the function as an item of it's own memory table
+
+                rec_return_type_quote_symbol = SymbolQuoteType(chr(ord("a")+self.quote_index), resolved_type=None)
+                self.quote_index += 1
+
+                rec_function_symbol = SymbolFunction(function_id, parameters_list, rec_param_type_list, function_node.function_body_node, rec_return_type_quote_symbol, is_recursive=True)
+                mt.define(function_id, rec_function_symbol)
+                # TODO: check if the returned type of the function does correspond to the deducted type in the recursive call
             
             self.memory_table = mt
             
@@ -224,7 +245,7 @@ class InterpreterType(NodeVisitor):
             # 4 We remove the memory table and define the function symbol
             self.memory_table = self.memory_table.following_table
             
-            function_symbol = SymbolFunction(function_id, parameters_list, parameters_types_list, function_node.function_body_node, result_type)
+            function_symbol = SymbolFunction(function_id, parameters_list, parameters_types_list, function_node.function_body_node, result_type, is_recursive=node.is_recursive)
             self.memory_table.define(function_id, function_symbol)
 
             print("Dfining function")

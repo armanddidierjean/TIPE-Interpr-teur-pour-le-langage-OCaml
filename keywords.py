@@ -52,6 +52,7 @@ FUNCTION = 'FUNCTION'
 IF = 'IF'
 THEN = 'THEN'
 ELSE = 'ELSE'
+REC = 'REC'
 
 ############### Types ###############
 INT = 'INT'
@@ -78,6 +79,7 @@ RESERVED_KEYWORDS = {
     'if': Token(IF, None),
     'then': Token(THEN, None),
     'else': Token(ELSE, None),
+    'rec': Token(REC, None)
 }
 
 BUILTIN_TYPES = [

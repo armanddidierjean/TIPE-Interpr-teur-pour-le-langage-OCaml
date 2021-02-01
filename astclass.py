@@ -142,12 +142,15 @@ class AssignmentFunction(AST):
         Name of the defined variable
     content_node : AST node
         Content of a function, can be an other function or a block
+    is_recursive : bool
+        If the function should be recursive
 
-        TODO: rename the attributes
+    TODO: rename the attributes
     """
-    def __init__(self, var_name, content_node):
+    def __init__(self, var_name, content_node, is_recursive):
         self.var_name = var_name
         self.content_node = content_node
+        self.is_recursive = is_recursive
 
 class Reassignment(AST):
     """

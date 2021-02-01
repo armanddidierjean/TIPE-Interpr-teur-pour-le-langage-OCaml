@@ -304,7 +304,7 @@ class Parser:
     def assignment_statement(self):
         """
         LET assignment (AND assignment)* IN block
-        LET assignment (AND assignment)*
+        LET assignment (AND assignment)*                => TODO: to implement, for the moment we just use an IN UnitNode
 
         Return let_statement node
         """
@@ -331,12 +331,20 @@ class Parser:
     
     def assignment(self):
         """
-        ID EQUALS FUNCTION (ID|LPAREN RPAREN)+ ARROW block
-        ID EQUALS REF? block
+        REC? ID EQUALS FUNCTION (ID|LPAREN RPAREN)+ ARROW block
+        REC? ID EQUALS REF? block                                   => The REC won't be used nor raise an error
 
         Return assignment node
         """
         log("Assignment")
+
+        # The REC keyword will only be used if this is a function declaration. It won't raise an error.
+        if self.current_token.type == REC:
+            is_rec = True
+            self.eat(REC)
+        else:
+            is_rec = False
+        
         var_name = self.current_token.value
         self.eat(ID)
 
@@ -383,7 +391,7 @@ class Parser:
             # let f = fun a b c -> block 
             # will be stored as Function(["a", "b", "c"], [None, None, None], block)
             
-            return AssignmentFunction(var_name, function_node)
+            return AssignmentFunction(var_name, function_node, is_recursive=is_rec)
 
         else:
             # It's not a function declaration

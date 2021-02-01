@@ -117,7 +117,7 @@ class InterpreterShow(NodeVisitor):
         self.print_ind('}')
     
     def visit_AssignmentFunction(self, node):
-        self.print_ind('AssignmentFunction', node.var_name)
+        self.print_ind('AssignmentFunction', node.var_name, node.is_recursive)
         self.print_ind('{')
         self.ind()
         self.visit(node.content_node)

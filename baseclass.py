@@ -142,12 +142,13 @@ class SymbolVariable(Symbol):
         return f"Variable {self.id}: isref={self.isref}; value={self.value}; type={self.type}"
 
 class SymbolFunction(Symbol):
-    def __init__(self, id, parameters_list, parameters_types_list, function_body_node, result_type):
+    def __init__(self, id, parameters_list, parameters_types_list, function_body_node, result_type, is_recursive):
         self.id = id
         self.parameters_list = parameters_list
         self.parameters_types_list = parameters_types_list
         self.function_body_node = function_body_node
         self.result_type = result_type
+        self.is_recursive = is_recursive
 
         self.symbol_type = "Function"
     
