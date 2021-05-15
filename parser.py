@@ -331,6 +331,7 @@ class Parser:
     
     def assignment(self):
         """
+        REC? ID (ID|LPAREN RPAREN)+ EQUAL block                     => Currified function assignment
         REC? ID EQUALS FUNCTION (ID|LPAREN RPAREN)+ ARROW block
         REC? ID EQUALS REF? block                                   => The REC won't be used nor raise an error
 
@@ -348,36 +349,33 @@ class Parser:
         var_name = self.current_token.value
         self.eat(ID)
 
-        self.eat(EQUALS)
+        # Currified function assignment
+        if self.current_token.type != EQUALS:
+            """
+            REC? ID (ID|LPAREN RPAREN)+ EQUAL block
+            """
 
-        if self.current_token.type == FUNCTION:
-            # It's a function declaration
-            self.eat(FUNCTION)
             parameters_list = []
 
-            # We need at least one (ID|LPAREN RPAREN) in the parameters_list.
-            # If we pass the following test, we should have parameters declared
-            if self.current_token.type == ARROW:
-                raise SyntaxError("Expected at least one parameter in the function declaration, got none")
+            while self.current_token.type != EQUALS:
+                # There is a new parameter name
 
-            while self.current_token.type != ARROW:
-                
                 if self.current_token.type == LPAREN:
-                    """LPAREN RPAREN"""
-                    self.eat(LPAREN)
-                    #TODO: Support couples
-                    self.eat(RPAREN)
-                    # It's an unit parameter
-                    # We use the None parameter to represent an UNIT id
-                    parameter_id = None
+                        """LPAREN RPAREN"""
+                        self.eat(LPAREN)
+                        #TODO: Support couples
+                        self.eat(RPAREN)
+                        # It's an unit parameter
+                        # We use the None parameter to represent an UNIT id
+                        parameter_id = None
                 else:
                     """ID"""
                     parameter_id = self.current_token.value
                     self.eat(ID)
-                
+                    
                 parameters_list.append(parameter_id)
-
-            self.eat(ARROW)
+            
+            self.eat(EQUALS)
 
             # The types are not yet determined
             parameters_types_list = [None] * len(parameters_list)
@@ -388,22 +386,70 @@ class Parser:
             function_node = Function(parameters_list, parameters_types_list, function_body_node)
 
             # The function is represented by the Function class.
-            # let f = fun a b c -> block 
+            # let f a b c = block 
             # will be stored as Function(["a", "b", "c"], [None, None, None], block)
-            
+                
             return AssignmentFunction(var_name, function_node, is_recursive=is_rec)
-
-        else:
-            # It's not a function declaration
-            # It's then a variable declaration
-            if self.current_token.type == REF:
-                self.eat(REF)
-                is_ref = True
-            else:
-                is_ref = False
         
-            block_node = self.block()
-            return AssignmentVariable(var_name, is_ref, block_node)        
+        # Non currified function or non function assignment
+        else:
+
+            self.eat(EQUALS)
+
+            if self.current_token.type == FUNCTION:
+                # It's a function declaration
+                self.eat(FUNCTION)
+                parameters_list = []
+
+                # We need at least one (ID|LPAREN RPAREN) in the parameters_list.
+                # If we pass the following test, we should have parameters declared
+                if self.current_token.type == ARROW:
+                    raise SyntaxError("Expected at least one parameter in the function declaration, got none")
+
+                while self.current_token.type != ARROW:
+                    
+                    if self.current_token.type == LPAREN:
+                        """LPAREN RPAREN"""
+                        self.eat(LPAREN)
+                        #TODO: Support couples
+                        self.eat(RPAREN)
+                        # It's an unit parameter
+                        # We use the None parameter to represent an UNIT id
+                        parameter_id = None
+                    else:
+                        """ID"""
+                        parameter_id = self.current_token.value
+                        self.eat(ID)
+                    
+                    parameters_list.append(parameter_id)
+
+                self.eat(ARROW)
+
+                # The types are not yet determined
+                parameters_types_list = [None] * len(parameters_list)
+
+                print("searching a function body")
+                function_body_node = self.block()
+
+                function_node = Function(parameters_list, parameters_types_list, function_body_node)
+
+                # The function is represented by the Function class.
+                # let f = fun a b c -> block 
+                # will be stored as Function(["a", "b", "c"], [None, None, None], block)
+                
+                return AssignmentFunction(var_name, function_node, is_recursive=is_rec)
+
+            else:
+                # It's not a function declaration
+                # It's then a variable declaration
+                if self.current_token.type == REF:
+                    self.eat(REF)
+                    is_ref = True
+                else:
+                    is_ref = False
+            
+                block_node = self.block()
+                return AssignmentVariable(var_name, is_ref, block_node)        
 
     """
     # Alternative function déclaration grammar

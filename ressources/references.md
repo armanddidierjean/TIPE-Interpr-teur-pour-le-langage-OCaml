@@ -45,8 +45,9 @@ command:    INT
 assignment_statement:   LET assignment (AND assignment)* IN block
                         LET assignment (AND assignment)*                            => TODO: to implement
 
-assignment:             REC? ID EQUALS FUNCTION (ID|LPAREN RPAREN)+ ARROW block
-                        REC? ID EQUALS REF? block                                   => The REC won't be used nor raise an error
+assignment:             REC? ID (ID|LPAREN RPAREN)+ EQUAL block                     => Currified function assignment
+                        REC? ID EQUALS FUNCTION (ID|LPAREN RPAREN)+ ARROW block
+                        REC? ID EQUALS REF? block                                   => The REC won't be used nor raise an error for nun function assignment
 
 variable_statement:     EXCLAMATION ID
                         ID REASSIGN block

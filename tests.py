@@ -22,6 +22,8 @@ def test():
         (9, "();;", UNIT, None),
         (10, "1 + 2 * (1 + 1) * 3;;", INT, 13),
         (11, "let rec factorielle = fun n -> if n = 1 then 1 else  n * factorielle (n-1) in factorielle 6;;", INT, 720),
+        (12, "let f a b () = 1 in f 1 't' ();;", INT, 1),
+        (13, "let rec factorielle n = if n = 1 then 1 else  n * factorielle (n-1) in factorielle 6;;", INT, 720),
     ]
     # Liste des erreurs rencontrées
     errors_list = []
