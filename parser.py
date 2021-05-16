@@ -97,7 +97,7 @@ class Parser:
         """PLUS block | MINUS block"""
         if self.current_token.type in (PLUS_INT, MINUS_INT):
             op_token = self.current_token
-            log("pres0 is eating a self type:", self.current_token)
+            #log("pres0 is eating a self type:", self.current_token)
             self.eat(self.current_token.type)
             block_node = self.block()
             return UnaryOp(op_token, block_node)
@@ -106,7 +106,7 @@ class Parser:
             node = self.pres1()
             while self.current_token.type in (PLUS_INT, MINUS_INT):
                 op_token = self.current_token
-                log("pres0 is eating a self type2:", self.current_token)
+                #log("pres0 is eating a self type2:", self.current_token)
                 self.eat(self.current_token.type)
                 node = BinOp(node, op_token, self.pres1())
             return node
@@ -122,7 +122,7 @@ class Parser:
 
         while self.current_token.type == MOD:
             op_token = self.current_token
-            log("pres1 is eating a self type:", self.current_token)
+            #log("pres1 is eating a self type:", self.current_token)
             self.eat(self.current_token.type)
             node = BinOp(node, op_token, self.pres2())
         
@@ -139,7 +139,7 @@ class Parser:
 
         while self.current_token.type == MUL_INT:
             op_token = self.current_token
-            log("pres2 is eating a self type:", self.current_token)
+            #log("pres2 is eating a self type:", self.current_token)
             self.eat(self.current_token.type)
             node = BinOp(node, op_token, self.pres3())
         
@@ -156,7 +156,7 @@ class Parser:
 
         while self.current_token.type in (EQUALS, DIFFERENT):
             op_token = self.current_token
-            log("pres3 is eating a self type:", self.current_token)
+            #log("pres3 is eating a self type:", self.current_token)
             self.eat(self.current_token.type)
             node = BinOp(node, op_token, self.pres4())
         
@@ -173,7 +173,7 @@ class Parser:
 
         while self.current_token.type in (BOOLEANCONJUNCTION, BOOLEANDISJUNCTION):
             op_token = self.current_token
-            log("pres4 is eating a self type:", self.current_token)
+            #log("pres4 is eating a self type:", self.current_token)
             self.eat(self.current_token.type)
             node = BinOp(node, op_token, self.code())
         
@@ -250,8 +250,8 @@ class Parser:
         if self.current_token.type in (INT, FLOAT, STRING):
             """INT | FLOAT | STRING"""
             node = Num(self.current_token.value, self.current_token.type)
-            print("NUM:", self.current_token.value, self.current_token.type)
-            log("Command is eating a self type (should be a num):", self.current_token)
+            #print("NUM:", self.current_token.value, self.current_token.type)
+            #log("Command is eating a self type (should be a num):", self.current_token)
             self.eat(self.current_token.type)
             return node
         elif self.current_token.type == LET:
@@ -264,7 +264,7 @@ class Parser:
             self.eat(DO)
             block_node = self.block()
             self.eat(DONE)
-            log(f"Returning a Loop node boolean_node={boolean_node}, block_node={block_node}")
+            #log(f"Returning a Loop node boolean_node={boolean_node}, block_node={block_node}")
             return Loop(boolean_node, block_node)
         elif self.current_token.type == IF:
             """IF block THEN block (ELSE block)?"""
@@ -452,7 +452,7 @@ class Parser:
                     is_ref = False
             
                 block_node = self.block()
-                return AssignmentVariable(var_name, is_ref, block_node)        
+                return AssignmentVariable(var_name, is_ref, block_node)
 
     """
     # Alternative function déclaration grammar
