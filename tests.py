@@ -24,6 +24,9 @@ def test():
         (11, "let rec factorielle = fun n -> if n = 1 then 1 else  n * factorielle (n-1) in factorielle 6;;", INT, 720),
         (12, "let f a b () = 1 in f 1 't' ();;", INT, 1),
         (13, "let rec factorielle n = if n = 1 then 1 else  n * factorielle (n-1) in factorielle 6;;", INT, 720),
+        (14, ";;", UNIT, None),
+        (15, "- 1 + 1;;", INT, -2),          # Unary Op, !right associative!
+        (16, "1 - 1 + 1;;", INT, 1),         # Binary Op
     ]
     # Liste des erreurs rencontrées
     errors_list = []

@@ -51,6 +51,8 @@ class Parser:
         log("Program")
         if self.current_token.type != SEMI:
             node = self.block()
+        else:
+            node = UnitNode()
         self.eat(SEMI)
         self.eat(SEMI)
         return Program(node)
@@ -93,13 +95,14 @@ class Parser:
         log("Pres0")
 
         """PLUS block | MINUS block"""
-        if self.current_token in (PLUS_INT, MINUS_INT):
+        if self.current_token.type in (PLUS_INT, MINUS_INT):
             op_token = self.current_token
             log("pres0 is eating a self type:", self.current_token)
             self.eat(self.current_token.type)
-            return UnaryOp(op_token, self.pres1())
+            block_node = self.block()
+            return UnaryOp(op_token, block_node)
         else:
-            """code ((PLUS | MINUS) code)*"""
+            """pres1 ((PLUS | MINUS) pres1)*"""
             node = self.pres1()
             while self.current_token.type in (PLUS_INT, MINUS_INT):
                 op_token = self.current_token
@@ -144,7 +147,7 @@ class Parser:
 
     def pres3(self):
         """
-        pres4 (EQUAL | DIFFERENT) pres4
+        pres4 ((EQUAL | DIFFERENT) pres4)*
 
         USED FOR A BINOP
         """

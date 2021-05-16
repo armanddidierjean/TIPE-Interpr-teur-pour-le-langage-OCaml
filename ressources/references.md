@@ -14,7 +14,7 @@ pres1:      pres2 (MOD pres2)*
 
 pres2:      pres3 (MUL pres3)*
 
-pres3:      pres4 (EQUAL | DIFFERENT) pres4
+pres3:      pres4 ((EQUAL | DIFFERENT) pres4)*              => Enchaîner des EQUAL lèvera généralement une erreur de type
 
 pres4:      code ((BOOLEANCONJUNCTION | BOOLEANDISJUNCTION) code)*
 
