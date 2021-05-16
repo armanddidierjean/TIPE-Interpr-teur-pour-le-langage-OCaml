@@ -21,7 +21,7 @@ https://caml.inria.fr/pub/docs/manual-ocaml/language.html
 
 # Thématiques à explorer
 
-Polymorphisme : [Polymorphis](https://en.wikibooks.org/wiki/Introduction_to_Programming_Languages/Polymorphis)
+Polymorphisme : [Polymorphism](https://en.wikibooks.org/wiki/Introduction_to_Programming_Languages/Polymorphis)
 Pattern matching
 Predictive parser
 

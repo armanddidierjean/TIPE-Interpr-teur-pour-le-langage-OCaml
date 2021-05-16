@@ -23,7 +23,7 @@ Les Unary Operator créent un phénomène d'associativités à droite `-1+1` est
 
 # TODO
 
-Add a isref = False in function symbol and remove variable check in reassignement
+Add a isref = False in function symbol and remove variable check in reassignment
 remove id from Function AST node
 
 Check Variable call of a function don't raise an error because of the get content check
@@ -50,7 +50,7 @@ Permettre d'avoir des elements vide: LPAREN RPAREN ou BEGIN END
 * If statement
 * fail_withs
 
-Creer plusieurs classes de symboles:
+Créer plusieurs classes de symboles:
     var (id, value, type, isref)
     type (id, type)
     function(id, formal_params[Symbole-var], type)

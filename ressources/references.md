@@ -84,7 +84,7 @@ Assignment(var_name, isref, value_node)
 Reassignment(id, new_value_node)
 Variable(var_name, get_content)
 
-# Micelianous
+# Miscellaneous
 UnitNode()          # Used to represent a portion of code that
                     # should not be executed ("begin end", "()")
 

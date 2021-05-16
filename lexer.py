@@ -41,7 +41,7 @@ class Lexer:
 
         Parameters
         ----------
-        nb : int, optionnal
+        nb : int, optional
             Number of character to advance (default is 1)
         """
         for _ in range(nb):
