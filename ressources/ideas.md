@@ -5,10 +5,16 @@
 > Violet : connaissances générales
 > Vert : propre à ce projet
 
+**Ressources list**
+https://github.com/sdmg15/Best-websites-a-programmer-should-visit#building-a-simple-compilerinterpreter
+
 **Books**
 [The C Programming Language](https://en.wikipedia.org/wiki/The_C_Programming_Language)
 
 [Microsoft - The Implementation of Functional Programming Languages](https://www.microsoft.com/en-us/research/publication/the-implementation-of-functional-programming-languages/) <téléchargé/>
+
+[Crafting Interpreters](http://craftinginterpreters.com/contents.html) <Excellent>
+   - Page http://craftinginterpreters.com/a-map-of-the-territory.html
 
 **OCaml language** : références officielles
 https://caml.inria.fr/pub/docs/manual-ocaml/language.html

@@ -3,6 +3,19 @@
 Fixer le loggin et les erreurs raising
 Documenter le parsing de fonctions. Quels sont les grammaires? Quels sont les nodes AST utilisées? (un peu bizarre)
 
+Difference entre UnitNode and NothingNode. None is also used in function parameters' lists
+ - `code` LPAREN RPAREN         -> UnitNode()
+ - `block` LPAREN RPAREN        -> NothingNode
+ - `sequence` BEGIN END         -> UnitNode()
+
+L'AST node Block est inutile et peut dans la majorité des cas être éliminée
+
+Rename l'AST node Num() car elle supporte des STRING and FLOAT, INT
+
+Use only one AST for PrintInt and PrintString with a type?
+
+Les Unary Operator créent un phénomène d'associativités à droite `-1+1` est interprété comme `-(1+1)`
+
 # Étapes suivantes
  * Ajouter des structures de donnée : commencer par des tuples
  * Nettoyer la gestion de la mémoire
