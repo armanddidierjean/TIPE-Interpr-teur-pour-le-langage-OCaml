@@ -69,23 +69,32 @@ class Symbol(object):
     type : PREDEFINED TYPE
         Type of symbol
     """
-    symbol_type = "Symbol"
+    symbol_type = "Symbol" #TODO: remove
     def __init__(self, id, isref, value, type):
+        self.symbol_type = "Symbol"
         self.id = id
-        self.isref = isref
-        self.value = value
-        self.type = type
+        #self.isref = isref
+        #self.value = value
+        #self.type = type
 
 class SymbolType(Symbol):
     """
     Represent a type
     - builtin type
-    - composites type (int -> string)
+    - composites type (int -> string) TODO :Really?
     """
     def __init__(self, id):
+        self.symbol_type = "Type"
         self.id = id
         #self.type = type
         #TODO: remove type
+    
+    def __str__(self):
+        return f"<{self.id}>"
+    
+    def __repr__(self):
+        return self.__str__()
+
 
 class SymbolQuoteType(Symbol):
     """
@@ -106,6 +115,7 @@ class SymbolQuoteType(Symbol):
         This allow to do type determination for procedure parameters
     """
     def __init__(self, id, resolved_type=None):
+        self.symbol_type = "Type"
         self.id = id
         self.resolved_type = resolved_type
 
@@ -132,25 +142,36 @@ class SymbolQuoteType(Symbol):
     
 class SymbolVariable(Symbol):
     def __init__(self, id, isref, value, type):
+        self.symbol_type = "Variable"
         self.id = id
         self.isref = isref
         self.value = value
         self.type = type
-        self.symbol_type = "Variable"
+    
+    def __str__(self):
+        return f"Variable {self.id}: isref={self.isref}; value={self.value}; type={self.type}"
+
+class SymbolArrayVariable(Symbol):
+    def __init__(self, id, size, value, type):
+        self.symbol_type = "ArrayVariable"
+        self.id = id
+        self.size = size
+        self.value = value          # An array?
+        self.type = type            # Correspond of the type of the content of the variable
+                                    # TODO: improve array_type Is it the type of the content or the type of 'a array?
     
     def __str__(self):
         return f"Variable {self.id}: isref={self.isref}; value={self.value}; type={self.type}"
 
 class SymbolFunction(Symbol):
     def __init__(self, id, parameters_list, parameters_types_list, function_body_node, result_type, is_recursive):
+        self.symbol_type = "Function"
         self.id = id
         self.parameters_list = parameters_list
         self.parameters_types_list = parameters_types_list
         self.function_body_node = function_body_node
         self.result_type = result_type
         self.is_recursive = is_recursive
-
-        self.symbol_type = "Function"
     
     def __str__(self):
         text = f"Function {self.id}: "
