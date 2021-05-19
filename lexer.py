@@ -74,6 +74,18 @@ class Lexer:
         for i in range(nb):
             result += self.text[self.current_pos + i]
         return result
+    
+    def isEnd(self):
+        """
+        Return true if the end of the code is not attained
+        """
+        return self.current_token is not None
+
+    def isNotEnd(self):
+        """
+        Return true when the code while the end of the code is not attained
+        """
+        return not self.isEnd()
 
     def get_id(self):
         """
@@ -83,7 +95,7 @@ class Lexer:
         The function get_next_token will check the first character is a-Z, A-Z before calling this one.
         """
         result = ''
-        while self.current_char is not None and (self.current_char.isalnum() or self.current_char == '_'):
+        while self.isNotEnd() and (self.current_char.isalnum() or self.current_char == '_'):
             result += self.current_char
             self.advance()
         return result
@@ -93,16 +105,16 @@ class Lexer:
         Return an INT or a FLOAT token 
         """
         result = ''
-        while self.current_char is not None and self.current_char.isdigit():
+        while self.isNotEnd() and self.current_char.isdigit():
             result += self.current_char
             self.advance()
         
-        if self.current_char is None or self.current_char != '.':
+        if self.isEnd() or self.current_char != '.':
             return Token(INT, int(result))
         
         result += '.'
         self.advance()
-        while self.current_char is not None and self.current_char.isdigit():
+        while self.isNotEnd() and self.current_char.isdigit():
             result += self.current_char
             self.advance()
         
@@ -121,7 +133,7 @@ class Lexer:
 
         result = ''
         # We are expecting a second delimiter so we can suppose the string wont be finished before we found it
-        while self.current_char is not None and self.current_char != delimiter:
+        while self.isNotEnd() and self.current_char != delimiter:
             # TODO: does that works for `\n`? we would want to keep them 
             # Escaped character: \" \n...
             if self.current_char == '\\':
@@ -148,7 +160,7 @@ class Lexer:
 
         # Pass the '(*'
         self.advance(2)
-        while self.current_char is not None and self.peek(2) != '*)':
+        while self.isNotEnd() and self.peek(2) != '*)':
             # Support nested comments
             if self.peek(2) == '(*':
                 self.pass_comment()

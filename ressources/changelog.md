@@ -8,3 +8,4 @@ Cleaning
 # 19 mai
 
 Fix bugs in the Lexer : unclosed strings and comment started an infinite loop
+[Lexer] feat: use isEnd and isNotEnd functions to improve EOF checking
