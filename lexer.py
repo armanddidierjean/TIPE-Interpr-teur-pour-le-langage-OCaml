@@ -19,6 +19,13 @@ class Lexer:
         return the next token found in text
         return EOF when all tokens have been lexed
     """
+
+    # WARNING
+    # All eating methods using while loop to find a specific character
+    # should **always** check `self.current_char is not None`
+    # or an infinit loop may happen. 
+    # OCaml example: `let a = 'text;;`
+
     def __init__(self, text):
         self.text = text
 
@@ -106,38 +113,53 @@ class Lexer:
         Return a string
         Support various string delimitation and character escape
         """
+        # The delimiter can be a simple quote ' or a double quote "
         delimiter = self.current_char
+
         # Pass the first delimiter
         self.advance()
+
         result = ''
-        # We are expecting a second delimiter so we can suppose the string wont be finished before
-        while self.current_char != delimiter:
+        # We are expecting a second delimiter so we can suppose the string wont be finished before we found it
+        while self.current_char is not None and self.current_char != delimiter:
+            # TODO: does that works for `\n`? we would want to keep them 
             # Escaped character: \" \n...
             if self.current_char == '\\':
                 # We just pass the backslash
-                # The body of the while loop while add the char even if it's the delimiter
+                # then add the char even if it's the delimiter
                 self.advance()
             result += self.current_char
             self.advance()
         
-        # Pass the second delimiter
-        self.advance()
-
-        return Token(STRING, result)
+        # Make sure the remaining character is the delimiter
+        if self.current_char == delimiter:
+            # Pass the second delimiter
+            self.advance()
+            return Token(STRING, result)
+        else:
+            # The code was entirely read but the string was not closed
+            raise SyntaxError("The string was not closed")
 
     def pass_comment(self):
         """
         Advance in the text while the current char is inside a comment
         """
+        # Require nested comment to be each closed
+
         # Pass the '(*'
         self.advance(2)
-        while self.peek(2) != '*)':
+        while self.current_char is not None and self.peek(2) != '*)':
             # Support nested comments
             if self.peek(2) == '(*':
                 self.pass_comment()
             self.advance()
-        # Pass the '*)'
-        self.advance(2)
+        
+        # Make sure the remaining characters are a comment closer
+        if self.peek(2) == '*)':
+            # Pass the '*)'
+            self.advance(2)
+        else:
+            raise SyntaxError("The comment was not closed")
 
     def get_next_token(self):
         """
