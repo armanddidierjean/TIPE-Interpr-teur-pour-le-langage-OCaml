@@ -80,3 +80,20 @@ def test():
 
 test()
 
+def errors_test():
+    tests_list = [
+        # (id, code_string, error_descrition)
+        (1, "'text;;", 'Unclosed string'),
+        (2, "(* first (* second *)", "Unclosed comment"),
+        (3, "}", "Invalid character")
+    ]
+
+    for test in tests_list:
+        # An error is expected to occurs
+        try:
+            lexer = Lexer(test)
+            raise RuntimeError(f"Test failure {test[0]} : {test[2]}")
+        except:
+            pass
+
+errors_test()   # Should silently pass
