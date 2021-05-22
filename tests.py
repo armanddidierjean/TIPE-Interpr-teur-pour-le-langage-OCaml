@@ -85,7 +85,8 @@ def errors_test():
         # (id, code_string, error_descrition)
         (1, "'text;;", 'Unclosed string'),
         (2, "(* first (* second *)", "Unclosed comment"),
-        (3, "}", "Invalid character")
+        (3, "}", "Invalid character"),
+        (4, "1", "Unterminated code")
     ]
 
     for test in tests_list:

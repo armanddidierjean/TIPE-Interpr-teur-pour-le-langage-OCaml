@@ -79,7 +79,7 @@ class Lexer:
         """
         Return true if the end of the code is not attained
         """
-        return self.current_token is not None
+        return self.current_char is None
 
     def isNotEnd(self):
         """
