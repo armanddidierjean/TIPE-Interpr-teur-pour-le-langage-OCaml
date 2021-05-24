@@ -47,7 +47,8 @@ assignment_statement:   LET assignment (AND assignment)* IN block
 
 assignment:             REC? ID (ID|LPAREN RPAREN)+ EQUAL block                     => Currified function assignment
                         REC? ID EQUALS FUNCTION (ID|LPAREN RPAREN)+ ARROW block
-                        REC? ID EQUALS REF? block                                   => The REC won't be used nor raise an error for nun function assignment
+                        REC? ID EQUALS REF? block                                   => The REC won't be used nor raise an    
+                                                                                        error for non function assignment
 
 variable_statement:     EXCLAMATION ID
                         ID REASSIGN block

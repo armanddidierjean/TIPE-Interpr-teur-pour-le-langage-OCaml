@@ -1,5 +1,11 @@
 # TODO
 
+Implementer un **panic mode** error recovery?
+    - require a class for error handling
+
+Replace `eat()` by `match`
+Add `peek()`
+
 Est-ce que nous utiliserions cette stratégie pour s'assurer d'un string est fermé ? [string / crafting interpreters](http://craftinginterpreters.com/scanning.html#string-literals)
 Ajouter un `.isNotEnded` in the Lexer
 
