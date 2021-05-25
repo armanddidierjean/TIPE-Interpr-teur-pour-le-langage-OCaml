@@ -14,10 +14,18 @@ class Token:
         Type of the token
     value : VALUE (string, int...)
         Value of the token (value, None or keyword)
+    position : int
+        Position of the begining of the associated code, used for error reporting
+    length : int
+        Length of the associated code, used for error reporting
     """
-    def __init__(self, type, value):
+    def __init__(self, type, value, position, length):
         self.type = type
         self.value = value
+
+        # We use the position and the token length for errors reporting
+        self.position = position
+        self.length = length
     
     def __str__(self):
         """

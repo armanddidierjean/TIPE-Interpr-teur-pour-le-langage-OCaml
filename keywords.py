@@ -62,24 +62,24 @@ STRING = 'STRING'
 
 ############### RESERVED KEYWORDS ###############
 RESERVED_KEYWORDS = {
-    'let': Token(LET, None),
-    'and': Token(AND, None),
-    'in': Token(IN, None),
-    'ref': Token(REF, None),
-    'begin': Token(BEGIN, None),
-    'end': Token(END, None),
-    'while': Token(WHILE, None),
-    'do': Token(DO, None),
-    'done': Token(DONE, None),
-    'mod': Token(MOD, None),
-    'print_int': Token(PRINT_INT, None),
-    'print_string': Token(PRINT_STRING, None),
-    'function': Token(FUNCTION, None),
-    'fun': Token(FUNCTION, None),
-    'if': Token(IF, None),
-    'then': Token(THEN, None),
-    'else': Token(ELSE, None),
-    'rec': Token(REC, None)
+    'let': LET,
+    'and': AND,
+    'in': IN,
+    'ref': REF,
+    'begin': BEGIN,
+    'end': END,
+    'while': WHILE,
+    'do': DO,
+    'done': DONE,
+    'mod': MOD,
+    'print_int': PRINT_INT,
+    'print_string': PRINT_STRING,
+    'function': FUNCTION,
+    'fun': FUNCTION,
+    'if': IF,
+    'then': THEN,
+    'else': ELSE,
+    'rec': REC
 }
 
 BUILTIN_TYPES = [

@@ -104,13 +104,16 @@ class Lexer:
         """
         Return an INT or a FLOAT token 
         """
+        # Note the position of the begining of the number for error reporting
+        pos = self.current_pos
+
         result = ''
         while self.isNotEnd() and self.current_char.isdigit():
             result += self.current_char
             self.advance()
         
         if self.isEnd() or self.current_char != '.':
-            return Token(INT, int(result))
+            return Token(INT, int(result), pos, len(result))
         
         result += '.'
         self.advance()
@@ -118,7 +121,7 @@ class Lexer:
             result += self.current_char
             self.advance()
         
-        return Token(FLOAT, float(result))
+        return Token(FLOAT, float(result), pos, len(result))
     
     def get_string_token(self):
         """
@@ -127,6 +130,9 @@ class Lexer:
         """
         # The delimiter can be a simple quote ' or a double quote "
         delimiter = self.current_char
+
+        # Begin position of the string
+        pos = self.current_pos
 
         # Pass the first delimiter
         self.advance()
@@ -147,7 +153,7 @@ class Lexer:
         if self.current_char == delimiter:
             # Pass the second delimiter
             self.advance()
-            return Token(STRING, result)
+            return Token(STRING, result, pos, len(result))
         else:
             # The code was entirely read but the string was not closed
             raise SyntaxError("The string was not closed")
@@ -185,9 +191,10 @@ class Lexer:
             If a not defined character is found
         """
         current_char = self.current_char
+        current_pos = self.current_pos
 
         if current_char is None:
-            return Token(EOF, None)
+            return Token(EOF, None, -1, -1) # TODO: use None instead of -1 ?
 
         if self.current_char == ' ' or self.current_char == '\n' or self.current_char == '\t':
             # skip whitespace or new lines and tabs
@@ -209,85 +216,86 @@ class Lexer:
         ############### ID ###############
         if self.current_char.isalpha() and self.current_char.islower():
             name = self.get_id()
+            length = len(name)      # Length of the code
             if name in RESERVED_KEYWORDS:
-                return RESERVED_KEYWORDS[name]
+                return Token(RESERVED_KEYWORDS[name], None, current_pos, len(name))
             else:
-                return Token(ID, name)
+                return Token(ID, name, current_pos, length)
 
         ############### Two characters ###############
         if self.peek(2) == '->':
             self.advance(2)
-            return Token(ARROW, '->')
+            return Token(ARROW, '->', current_pos, 2)
             
         ############### BINOP ###############
         if self.peek(2) == '+.':
             self.advance(2)
-            return Token(PLUS_FLOAT, '+.')
+            return Token(PLUS_FLOAT, '+.', current_pos, 2)
 
         if current_char == '+':
             self.advance()
-            return Token(PLUS_INT, '+')
+            return Token(PLUS_INT, '+', current_pos, 1)
         
         if self.peek(2) == '-.':
             self.advance(2)
-            return Token(MINUS_FLOAT, '-.')
+            return Token(MINUS_FLOAT, '-.', current_pos, 2)
 
         if current_char == '-':
             self.advance()
-            return Token(MINUS_INT, '-')
+            return Token(MINUS_INT, '-', current_pos, 1)
         
         if self.peek(2) == '*.':
             self.advance(2)
-            return Token(MUL_FLOAT, '*.')
+            return Token(MUL_FLOAT, '*.', current_pos, 2)
 
         if current_char == '*':
             self.advance()
-            return Token(MUL_INT, '*')
+            return Token(MUL_INT, '*', current_pos, 1)
         
         if self.peek(2) == '/.':
             self.advance(2)
-            return Token(DIV_FLOAT, '/.')
+            return Token(DIV_FLOAT, '/.', current_pos, 2)
 
         if current_char == '/':
             self.advance()
-            return Token(DIV_INT, '/')
+            return Token(DIV_INT, '/', current_pos, 1)
         
         ############### Micelianous ###############
 
         if current_char == '(':
             self.advance()
-            return Token(LPAREN, '(')
+            return Token(LPAREN, '(', current_pos, 1)
         
         if current_char == ')':
             self.advance()
-            return Token(RPAREN, ')')
+            return Token(RPAREN, ')', current_pos, 1)
         
         if current_char == ';':
             self.advance()
-            return Token(SEMI, ';')
+            return Token(SEMI, ';', current_pos, 1)
 
         if self.peek(2) == ':=':
             self.advance(2)
-            return Token(REASSIGN, ':=')
+            return Token(REASSIGN, ':=', current_pos, 2)
         
         if self.peek(2) == '<>':
             self.advance(2)
-            return Token(DIFFERENT, '<>')
+            return Token(DIFFERENT, '<>', current_pos, 2)
         
         if current_char == '=':
             self.advance()
-            return Token(EQUALS, '=')
+            return Token(EQUALS, '=', current_pos, 1)
 
         if current_char == '!':
             self.advance()
-            return Token(EXCLAMATION, '!')
+            return Token(EXCLAMATION, '!', current_pos, 1)
         
         if self.peek(2) == '&&':
             self.advance(2)
-            return Token(BOOLEANCONJUNCTION, '&&')
+            return Token(BOOLEANCONJUNCTION, '&&', current_pos, 2)
         
         if self.peek(2) == '||':
             self.advance(2)
-            return Token(BOOLEANDISJUNCTION, '||')
+            return Token(BOOLEANDISJUNCTION, '||', current_pos, 2)
 
         raise SyntaxError("Invalid charactere")
