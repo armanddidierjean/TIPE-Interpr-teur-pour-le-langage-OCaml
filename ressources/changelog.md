@@ -18,3 +18,6 @@ Fix bugs in the Lexer : unclosed strings and comment started an infinite loop
 
 # 22 mai
 [Lexer] fix: isEnd() function
+
+# 25 mai
+[InterpreterType] fix: type error in "function type" generation

@@ -259,7 +259,7 @@ class InterpreterType(NodeVisitor):
             for parameter_type in parameters_types_list:
                 function_object_type += str(parameter_type)
                 function_object_type += " -> "
-            function_object_type += result_type
+            function_object_type += str(result_type)
             
             print("function_object_type", function_object_type)
 
