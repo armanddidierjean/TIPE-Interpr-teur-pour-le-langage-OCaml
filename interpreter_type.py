@@ -204,10 +204,10 @@ class InterpreterType(NodeVisitor):
 
                     pass
                 else:
-                    quote_symbol = SymbolQuoteType(chr(ord("a")+self.quote_index), resolved_type=None)
+                    quote_symbol = SymbolQuoteType(self.quote_index, resolved_type=None)
                     used_quote_symbol_objects.append(quote_symbol)
                     self.quote_index += 1
-                    # self.quote_index contain the index of the next to use quote position character
+                    # self.quote_index contain the index of the next to use quote numeric_identifier
                     
                     parameter_symbol = SymbolVariable(parameter_id, isref=False, value=None, type=quote_symbol)
 
@@ -219,7 +219,7 @@ class InterpreterType(NodeVisitor):
             if node.is_recursive:
                 # We add the function as an item of it's own memory table
 
-                rec_return_type_quote_symbol = SymbolQuoteType(chr(ord("a")+self.quote_index), resolved_type=None)
+                rec_return_type_quote_symbol = SymbolQuoteType(self.quote_index, resolved_type=None)
                 used_quote_symbol_objects.append(rec_return_type_quote_symbol)
                 self.quote_index += 1
 

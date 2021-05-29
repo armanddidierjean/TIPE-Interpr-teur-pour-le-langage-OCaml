@@ -115,17 +115,29 @@ class SymbolQuoteType(Symbol):
      - resolve the unresolved quote type
     TODO: Assumption: when a comparison is done we can fix the type
 
+    # NOTE: Using the same id twice *should* not be a problem as the object created should be different
+
     Attributes
     ----------
-    id : string
+    numeric_id : string
+        Identifier for the quote symbole
     resolved_type : SymbolType object
         When we know what type should be a 'a object, we attribute it to resolved_type
         This allow to do type determination for procedure parameters
+    
+    Methods
+    -------
+    lock
+        Lock the quote type to prevent it from being resolved.
+        A quote type should always be locked after it's use (ex: function definition)
     """
-    def __init__(self, id, resolved_type=None):
-        self.symbol_type = "Type"
-        self.id = id
+    def __init__(self, numeric_id, resolved_type=None):
+        self.symbol_type = "QuoteType"
+        self.numeric_id = numeric_id
         self.resolved_type = resolved_type
+
+        #TODO: remove
+        #self.id = ord(numeric_id)
 
         # If the symbole can be resolved
         # Can be changed with the self.lock() command
@@ -140,6 +152,13 @@ class SymbolQuoteType(Symbol):
         A quote type should always be locked after the end of its definition, before its usage
         """
         self._locked = True
+    
+    def _generate_string_identifier(self):
+        """
+        Return a string identifier associated with the symbole
+        Constructed of the format a b ... z aa bb ... zz aaa bbb ... zzz
+        """
+        return chr(ord('a') + self.numeric_id % 26) * (self.numeric_id // 26 + 1)
 
     def __eq__(self, other):
         """
@@ -165,9 +184,9 @@ class SymbolQuoteType(Symbol):
     
     def __str__(self):
         if self.resolved_type is not None:
-            return f"<SymbolQuoteType:{self.id} is {self.resolved_type}>"
+            return f"<SymbolQuoteType:{self._generate_string_identifier()} is {self.resolved_type}>"
         else:
-            return f"<SymbolQuoteType:{self.id}>"
+            return f"<SymbolQuoteType:{self._generate_string_identifier()}>"
     
     def __repr__(self):
         return self.__str__()
