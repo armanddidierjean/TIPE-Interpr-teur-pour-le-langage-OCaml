@@ -187,6 +187,10 @@ class InterpreterType(NodeVisitor):
             # TODO: improve this system
             rec_param_type_list = []
 
+            # We need to lock **all** quote object after the function definition, before its call
+            # Every time we will create a such symbole we will add it here
+            used_quote_symbol_objects = []
+
             for parameter_id in parameters_list:
                 # We add each parameters to the memory table
                 # By default each type is defined to a quote type
@@ -201,6 +205,7 @@ class InterpreterType(NodeVisitor):
                     pass
                 else:
                     quote_symbol = SymbolQuoteType(chr(ord("a")+self.quote_index), resolved_type=None)
+                    used_quote_symbol_objects.append(quote_symbol)
                     self.quote_index += 1
                     # self.quote_index contain the index of the next to use quote position character
                     
@@ -215,6 +220,7 @@ class InterpreterType(NodeVisitor):
                 # We add the function as an item of it's own memory table
 
                 rec_return_type_quote_symbol = SymbolQuoteType(chr(ord("a")+self.quote_index), resolved_type=None)
+                used_quote_symbol_objects.append(rec_return_type_quote_symbol)
                 self.quote_index += 1
 
                 rec_function_symbol = SymbolFunction(function_id, parameters_list, rec_param_type_list, function_node.function_body_node, rec_return_type_quote_symbol, is_recursive=True)
@@ -260,6 +266,10 @@ class InterpreterType(NodeVisitor):
                 function_object_type += str(parameter_type)
                 function_object_type += " -> "
             function_object_type += str(result_type)
+
+            # We can now lock used quote symboles object
+            for quote_symbole in used_quote_symbol_objects:
+                quote_symbole.lock()
             
             print("function_object_type", function_object_type)
 

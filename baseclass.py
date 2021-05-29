@@ -127,13 +127,37 @@ class SymbolQuoteType(Symbol):
         self.id = id
         self.resolved_type = resolved_type
 
+        # If the symbole can be resolved
+        # Can be changed with the self.lock() command
+        self._locked = False
+    
+    def lock(self):
+        """
+        Prevent the unresolved quote type from being locked.
+        Should for example be used after the defintion of the function, before its call
+
+        # WARNING
+        A quote type should always be locked after the end of its definition, before its usage
+        """
+        self._locked = True
+
     def __eq__(self, other):
+        """
+        Charge the equality operation
+        Allow to resolve unresolved quote type
+        """
         if self.resolved_type is None:
-            # The type is unresolved
-            print("Comparing unresolved", self, other)
-            # We can now resolve the two elements
-            self.resolved_type = other
-            return True
+            if self.lock:
+                # The quote type is locked
+                # An unresolved and locked type accept anything
+                print("Comparing unresolved locked", self, other)
+                return True
+            else:
+                # The type is unresolved but not locked
+                print("Comparing unresolved", self, other)
+                # We can now resolve the two elements
+                self.resolved_type = other
+                return True
         else:
             print("Comparing resolved", self, other)
             # The type is already resolved. We then need to compare the real type and the other type
