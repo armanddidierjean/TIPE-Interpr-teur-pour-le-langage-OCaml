@@ -33,8 +33,9 @@ class InterpreterType(NodeVisitor):
         self.quote_index = 0
     
     def _init_base_types(self):
-        print("Initing base type")
-        for symbol in BUILTIN_TYPES:
+        print("Initiating base type")
+        for identifier in BUILTIN_TYPES:
+            symbol = BUILTIN_TYPES[identifier]
             self.memory_table.define(symbol.id, symbol)
     
     def interpret(self):
@@ -67,7 +68,7 @@ class InterpreterType(NodeVisitor):
         for command_node in node.commands_list[:-1]:
             type = self.visit(command_node)
             # The type of the sequence elements, except the last should be unit
-            if type != UNIT:
+            if type != BUILTIN_TYPES["unit"]:
                 warning(f"{command_node} is of type {type} instead of unit in sequence")
         # The type of a sequence is the type of its last element
         return self.visit(node.commands_list[-1])
@@ -75,7 +76,8 @@ class InterpreterType(NodeVisitor):
     def visit_Num(self, node):
         log("Visiting Num")
         # Can be INT, FLOAT, STRING
-        return node.type
+        # node.type is set by the Lexer and countain a string like INT. We need to convert it to a symbol
+        return BUILTIN_TYPES[node.type.lower()]
     
     def visit_BinOp(self, node):
         log("Visiting BinOp")
@@ -83,12 +85,12 @@ class InterpreterType(NodeVisitor):
         # The left and right nodes should be of type int
         if node.op_token.type in (PLUS_INT, MINUS_INT, MUL_INT, DIV_INT):
             left_type = self.visit(node.left_node)
-            if left_type != INT:
+            if left_type != BUILTIN_TYPES["int"]:
                 error(f"Left node {node.left_node} is of type {left_type} instead of INTEGER in Binary Operation {node.op_token.type}")
             right_type = self.visit(node.right_node)
-            if right_type != INT:
+            if right_type != BUILTIN_TYPES["int"]:
                 error(f"Right node {node.right_node} is of type {right_type} instead of INTEGER in Binary Operation {node.op_token.type}")
-            return INT
+            return BUILTIN_TYPES["int"]
         # Boolean operation
         # The left and right nodes should have the same type
         if node.op_token.type in (EQUALS, DIFFERENT):
@@ -96,20 +98,20 @@ class InterpreterType(NodeVisitor):
             right_type = self.visit(node.right_node)
             if left_type != right_type:
                 error(f"Left node {node.left_node} is of type {left_type} and right node {node.right_node} of type {right_type} which are not the same in Boolean Binary Operation {node.op_token.type}")
-            return BOOL
+            return BUILTIN_TYPES["bool"]
         
         warning("Undefined operation BinOp", node.op_token.type)
-        return UNIT
+        return BUILTIN_TYPES["unit"]
 
     def visit_UnaryOp(self, node):
         log("Visiting Unary Op")
         if node.op_token.type in (PLUS_INT, MINUS_INT):
             type = self.visit(node.right_node)
-            if type != INT:
+            if type != BUILTIN_TYPES["int"]:
                 error(f"Unary node {node.right_node} is of type {type} instead of INTEGER in Unary Operation {node.op_token.type}")
-            return INT
+            return BUILTIN_TYPES["int"]
         warning("Undefined operation UnaryOp")
-        return UNIT
+        return BUILTIN_TYPES["unit"]
     
     def visit_AssignmentStatement(self, node):
         log("Visiting AssignmentStatement")
@@ -135,7 +137,7 @@ class InterpreterType(NodeVisitor):
             assignement_type = self.visit(assignment_node)
             # The type of the assignments should be unit
             #TODO: is this really useful?
-            if assignement_type != UNIT:
+            if assignement_type != BUILTIN_TYPES["unit"]:
                 warning(f"{assignment_node} is of type {type} instead of unit in assignment statement")
         
         result_type = self.visit(node.block_node)
@@ -158,7 +160,7 @@ class InterpreterType(NodeVisitor):
             self.memory_table.define(node.var_name, symbol)
             show(colors.CYELLOW, f"Assigning: {node.var_name} with type {symbol.type}", colors.ENDC)
             # An assignement is of type UNIT
-            return UNIT
+            return BUILTIN_TYPES["unit"]
         else:
             error("Memory error:", node.var_name, "is already defined in the current memory table")
             raise SyntaxError("Variable already defined")
@@ -200,7 +202,7 @@ class InterpreterType(NodeVisitor):
                     # This happen for example when we declare `let f = fun () -> 1`
 
                     # We add the type of the parameter to the list
-                    rec_param_type_list.append(UNIT)
+                    rec_param_type_list.append(BUILTIN_TYPES["unit"])
 
                     pass
                 else:
@@ -237,7 +239,7 @@ class InterpreterType(NodeVisitor):
             for parameter_id in parameters_list:
                 if parameter_id is None:
                     # The parameter is of type UNIT
-                    parameter_type = UNIT
+                    parameter_type = BUILTIN_TYPES["unit"]
                 else:
                     parameter_symbol = mt.get(parameter_id)
                     parameter_type = parameter_symbol.type
@@ -274,7 +276,7 @@ class InterpreterType(NodeVisitor):
             print("function_object_type", function_object_type)
 
 
-            return UNIT
+            return BUILTIN_TYPES["unit"]
         else:
             error("Memory error:", node.var_name, "is already defined in the current memory table")
             raise SyntaxError("Variable already defined")
@@ -293,7 +295,7 @@ class InterpreterType(NodeVisitor):
                     if symbol.type != value_type:
                         error(f"New value node {node.new_value_node} is of type {value_type} instead of {symbol.type} in Reassignment of {node.var_name}")
                     # A reassignement is of type UNIT
-                    return UNIT
+                    return BUILTIN_TYPES["unit"]
                 else:
                     error("Memory error:", node.var_name, "is not mutable")
                     raise SyntaxError("Variable not mutable")
@@ -320,7 +322,7 @@ class InterpreterType(NodeVisitor):
                 else:
                     # The variable is mutable
                     show(colors.CYELLOW, f"Accessing mutable variable {node.var_name}", colors.ENDC)
-                    return ['ref', symbol.type]
+                    return ['ref', symbol.type]                 #TODO: use a symbol
             else:
                 if node.get_content:
                     # The variable is not mutable and we are accessing its value (!var)
@@ -369,28 +371,28 @@ class InterpreterType(NodeVisitor):
 
     def visit_PrintInt(self, node):
         type = self.visit(node.node)
-        if type != INT:
+        if type != BUILTIN_TYPES["int"]:
             error(f"Got {type} instead of INT in PrintInt")
-        return UNIT
+        return BUILTIN_TYPES["unit"]
 
     def visit_PrintString(self, node):
         type = self.visit(node.node)
-        if type != STRING:
+        if type != BUILTIN_TYPES["string"]:
             error(f"Got {type} instead of STRING in PrintString")
-        return UNIT
+        return BUILTIN_TYPES["unit"]
     
     def visit_Loop(self, node):
         bool_type = self.visit(node.boolean_node)
-        if bool_type != BOOL:
+        if bool_type != BUILTIN_TYPES["bool"]:
             error(f"Boolean_node is of type {bool_type} instead of BOOL in Loop")
         block_type = self.visit(node.block_node)
-        if block_type != UNIT:
+        if block_type != BUILTIN_TYPES["unit"]:
             warning(f"Block node is of type {block_type} instead of UNIT in Loop")
-        return UNIT
+        return BUILTIN_TYPES["unit"]
     
     def visit_ConditionalStatement(self, node):
         condition_type = self.visit(node.condition_node)
-        if condition_type != BOOL:
+        if condition_type != BUILTIN_TYPES["bool"]:
             error(f"Condition_node is of type {condition_type} instead of BOOL in ConditionalStatement")
         then_type = self.visit(node.then_node)
         else_type = self.visit(node.else_node)
@@ -399,4 +401,4 @@ class InterpreterType(NodeVisitor):
         return then_type
     
     def visit_UnitNode(self, node):
-        return UNIT
+        return BUILTIN_TYPES["unit"]

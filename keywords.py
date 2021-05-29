@@ -82,8 +82,11 @@ RESERVED_KEYWORDS = {
     'rec': REC
 }
 
-BUILTIN_TYPES = [
-    SymbolType("int"),
-    SymbolType("float"),
-    SymbolType("string"),
-]
+# BUILTIN_TYPES is a dictionnary, it is used to define builtin types and to access them from the interpreter type methods
+BUILTIN_TYPES = {
+    "unit": SymbolType("unit"),
+    "int": SymbolType("int"),
+    "float": SymbolType("float"),
+    "string": SymbolType("string"),
+    "bool": SymbolType("bool"),
+}

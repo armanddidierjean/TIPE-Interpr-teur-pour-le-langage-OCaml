@@ -11,22 +11,22 @@ from lexer import *
 def test():
     tests_list = [
         # (id, code_string, type_res, value_res)
-        (1, "1 + 2 * 2 + 2;;", INT, 7),
-        (2, "let a = ref 0 in while !a <> 4 do begin print_int !a; a := !a + 1 end done;;", UNIT, None),
-        (3, "let i = ref 1 and n = 10 in while !i <> n do begin print_int !i; i := !i + 1 end done;;", UNIT, None),
-        (4, "let a = ref 'hello world' in begin a := 'Hello World!'; print_string !a end;;", UNIT, None),
-        (5, 'begin print_string "4\\"" (* print 4" (* then nested comments should work*) *); "Hello" end;;', STRING, "Hello"),
-        (6, "let a = 'text' in let a = 3 in a;;", INT, 3),
-        (7, "let f = fun a b c -> begin print_int 4; print_string b; c+a end in f 3 'TEXT' 3;;", INT, 6),
-        (8, "let f = fun a b () -> 1 in f 1 't' ();;", INT, 1),
-        (9, "();;", UNIT, None),
-        (10, "1 + 2 * (1 + 1) * 3;;", INT, 13),
-        (11, "let rec factorielle = fun n -> if n = 1 then 1 else  n * factorielle (n-1) in factorielle 6;;", INT, 720),
-        (12, "let f a b () = 1 in f 1 't' ();;", INT, 1),
-        (13, "let rec factorielle n = if n = 1 then 1 else  n * factorielle (n-1) in factorielle 6;;", INT, 720),
-        (14, ";;", UNIT, None),
-        (15, "- 1 + 1;;", INT, -2),          # Unary Op, !right associative!
-        (16, "1 - 1 + 1;;", INT, 1),         # Binary Op
+        (1, "1 + 2 * 2 + 2;;", BUILTIN_TYPES["int"], 7),
+        (2, "let a = ref 0 in while !a <> 4 do begin print_int !a; a := !a + 1 end done;;", BUILTIN_TYPES["unit"], None),
+        (3, "let i = ref 1 and n = 10 in while !i <> n do begin print_int !i; i := !i + 1 end done;;", BUILTIN_TYPES["unit"], None),
+        (4, "let a = ref 'hello world' in begin a := 'Hello World!'; print_string !a end;;", BUILTIN_TYPES["unit"], None),
+        (5, 'begin print_string "4\\"" (* print 4" (* then nested comments should work*) *); "Hello" end;;', BUILTIN_TYPES["string"], "Hello"),
+        (6, "let a = 'text' in let a = 3 in a;;", BUILTIN_TYPES["int"], 3),
+        (7, "let f = fun a b c -> begin print_int 4; print_string b; c+a end in f 3 'TEXT' 3;;", BUILTIN_TYPES["int"], 6),
+        (8, "let f = fun a b () -> 1 in f 1 't' ();;", BUILTIN_TYPES["int"], 1),
+        (9, "();;", BUILTIN_TYPES["unit"], None),
+        (10, "1 + 2 * (1 + 1) * 3;;", BUILTIN_TYPES["int"], 13),
+        (11, "let rec factorielle = fun n -> if n = 1 then 1 else  n * factorielle (n-1) in factorielle 6;;", BUILTIN_TYPES["int"], 720),
+        (12, "let f a b () = 1 in f 1 't' ();;", BUILTIN_TYPES["int"], 1),
+        (13, "let rec factorielle n = if n = 1 then 1 else  n * factorielle (n-1) in factorielle 6;;", BUILTIN_TYPES["int"], 720),
+        (14, ";;", BUILTIN_TYPES["unit"], None),
+        (15, "- 1 + 1;;", BUILTIN_TYPES["int"], -2),          # Unary Op, !right associative!
+        (16, "1 - 1 + 1;;", BUILTIN_TYPES["int"], 1),         # Binary Op
     ]
     # Liste des erreurs rencontrées
     errors_list = []

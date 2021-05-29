@@ -24,13 +24,15 @@ class InterpreterValue(NodeVisitor):
         
         # Base memory table, countain builtin types
         self.memory_table = MemoryTable("Main", 0, None)
-        self._init_base_types()
+        
+        #TODO: Is it useful to init base types?
+        #self._init_base_types()
     
-    def _init_base_types(self):
-        #TODO: Is this really useful?
-        print("Initing base type")
-        for symbol in BUILTIN_TYPES:
-            self.memory_table.define(symbol.id, symbol)
+    # TODO: Is it useful to init base types?
+    #def _init_base_types(self):
+    #    print("Initing base type")
+    #    for symbol in BUILTIN_TYPES:
+    #        self.memory_table.define(symbol.id, symbol)
     
     def interpret(self):
         return self.visit(self.AST_node)
