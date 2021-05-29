@@ -27,6 +27,7 @@ def test():
         (14, ";;", BUILTIN_TYPES["unit"], None),
         (15, "- 1 + 1;;", BUILTIN_TYPES["int"], -2),          # Unary Op, !right associative!
         (16, "1 - 1 + 1;;", BUILTIN_TYPES["int"], 1),         # Binary Op
+        (17, "let f a = a in begin f 1; f 'i' end;;", BUILTIN_TYPES["string"], 'i'),
     ]
     # Liste des erreurs rencontrées
     errors_list = []
@@ -86,7 +87,8 @@ def errors_test():
         (1, "'text;;", 'Unclosed string'),
         (2, "(* first (* second *)", "Unclosed comment"),
         (3, "}", "Invalid character"),
-        (4, "1", "Unterminated code")
+        (4, "1", "Unterminated code"),
+        (5, "let f a b = if true then a else b in f 1 'a';;", "Type error in function call and not in definition"),
     ]
 
     for test in tests_list:

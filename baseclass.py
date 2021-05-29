@@ -97,6 +97,13 @@ class SymbolType(Symbol):
         #self.type = type
         #TODO: remove type
     
+    def get_symbol_type(self):
+        """
+        Return the quote object corresponding to the type
+        Used for function call
+        """
+        return self
+    
     def __str__(self):
         return f"<{self.id}>"
     
@@ -152,6 +159,17 @@ class SymbolQuoteType(Symbol):
         A quote type should always be locked after the end of its definition, before its usage
         """
         self._locked = True
+    
+    def get_symbol_type(self):
+        """
+        Return the quote object corresponding to the type
+        Used for function call
+        Will return a Type or an unresolved QuoteType
+        """
+        if self.resolved_type is None:
+            return self
+        else:
+            return self.resolved_type.get_symbol_type()
     
     def _generate_string_identifier(self):
         """

@@ -355,8 +355,36 @@ class InterpreterType(NodeVisitor):
         if not len(parameters_types_list) == len(given_arguments_nodes_list):
             raise SyntaxError(f"Invalid arguments given in function call. Expected {len(given_arguments_nodes_list)} arguments got {len(parameters_types_list)}")
         
+        # We need to lock **all** quote object after the function definition, before its call
+        # Every time we will create a such symbole we will add it here
+        used_quote_symbol_objects = []
+        # We create a dictionnary that will store each expected type and the generated associated type
+        quote_type_correspondance = {}
+
         for i in range(len(parameters_types_list)):
-            expected_parameter_type = parameters_types_list[i]
+            expected_parameter_type = parameters_types_list[i].get_symbol_type() # Return the resolved Type or the unresolved QuoteType
+
+            # If the expected parameter is a quote type, it should have been locked in the function definition.
+            # Indeed, we don't want the function call to modify the function definition (ex: `let f a = a in begin f 1; f 'i' end;;` is valid)
+            # We still need to be able to resolve the type in the function call
+            # (ex: `let f a b = if true then a else b in f 1 'a';;` should raise an error as type a and b should be the same)
+            if expected_parameter_type.symbol_type == "QuoteType":
+                # It's an unresolved QuoteType
+                # It should be locked. To be able to be able to resolve it, we need to create a new one that will be stored in the dict quote_type_correspondance
+                if expected_parameter_type.numeric_id in quote_type_correspondance:
+                    # A quote type has already been created, we will use this one
+                    expected_parameter_type = quote_type_correspondance[expected_parameter_type.numeric_id]
+                else:
+                    # We create a new quote type
+                    quote_symbol = SymbolQuoteType(self.quote_index, resolved_type=None)
+                    used_quote_symbol_objects.append(quote_symbol)
+                    self.quote_index += 1
+                    # self.quote_index contain the index of the next to use quote numeric_identifier
+
+                    #We store this type is the dictionnary and use it
+                    quote_type_correspondance[expected_parameter_type.numeric_id] = quote_symbol
+                    expected_parameter_type = quote_symbol
+
             # The actual type is determined by calling visit method on the AST node
             actual_type_given = self.visit(given_arguments_nodes_list[i])
 
@@ -366,7 +394,22 @@ class InterpreterType(NodeVisitor):
                 raise TypeError(f"Invalid argument in function call. Expected argument of type {expected_parameter_type} got {actual_type_given}")
             
         # The result_type should have been resolved by the previous comparaisons
-        result_type = function_symbol.result_type
+        result_type = function_symbol.result_type.get_symbol_type()
+
+        # If the return type is a quote type, we need to replace it by the local one that has been created previously
+        # and should be stored in quote_type_correspondance
+        if result_type.symbol_type == "QuoteType":
+            if result_type.numeric_id in quote_type_correspondance:
+                # It has already be created. We use this one
+                result_type = quote_type_correspondance[result_type.numeric_id]
+            else:
+                # If a local type has not been created, that should mean the type had to be resolved in the function definition
+                warning("The return quote type was be resolved in function call, it should have been resolved in the function definition")
+
+        # We lock all quote symbol.
+        for quote_symbol in used_quote_symbol_objects:
+            quote_symbol.lock()
+        
         return result_type
 
     def visit_PrintInt(self, node):
