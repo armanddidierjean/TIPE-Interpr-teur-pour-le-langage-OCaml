@@ -184,7 +184,7 @@ class SymbolQuoteType(Symbol):
         Allow to resolve unresolved quote type
         """
         if self.resolved_type is None:
-            if self.lock:
+            if self._locked:
                 # The quote type is locked
                 # An unresolved and locked type accept anything
                 print("Comparing unresolved locked", self, other)
