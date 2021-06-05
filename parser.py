@@ -24,7 +24,7 @@ class Parser:
         self.lexer = lexer
         self.current_token = self.lexer.get_next_token()
     
-    def eat(self, type):
+    def match(self, type):
         """
         Check if the current token is of type `type` and get the next token from the lexer
 
@@ -53,8 +53,8 @@ class Parser:
             node = self.block()
         else:
             node = UnitNode()
-        self.eat(SEMI)
-        self.eat(SEMI)
+        self.match(SEMI)
+        self.match(SEMI)
         return Program(node)
     
     def block(self):
@@ -79,7 +79,7 @@ class Parser:
         """PLUS block | MINUS block"""
         if self.current_token.type in (PLUS_INT, MINUS_INT):
             op_token = self.current_token
-            self.eat(self.current_token.type)
+            self.match(self.current_token.type)
             block_node = self.block()
             return UnaryOp(op_token, block_node)
         else:
@@ -87,7 +87,7 @@ class Parser:
             node = self.pres1()
             while self.current_token.type in (PLUS_INT, MINUS_INT):
                 op_token = self.current_token
-                self.eat(self.current_token.type)
+                self.match(self.current_token.type)
                 node = BinOp(node, op_token, self.pres1())
             return node
 
@@ -102,7 +102,7 @@ class Parser:
 
         while self.current_token.type == MOD:
             op_token = self.current_token
-            self.eat(self.current_token.type)
+            self.match(self.current_token.type)
             node = BinOp(node, op_token, self.pres2())
         
         return node
@@ -118,7 +118,7 @@ class Parser:
 
         while self.current_token.type == MUL_INT:
             op_token = self.current_token
-            self.eat(self.current_token.type)
+            self.match(self.current_token.type)
             node = BinOp(node, op_token, self.pres3())
         
         return node
@@ -134,7 +134,7 @@ class Parser:
 
         while self.current_token.type in (EQUALS, DIFFERENT):
             op_token = self.current_token
-            self.eat(self.current_token.type)
+            self.match(self.current_token.type)
             node = BinOp(node, op_token, self.pres4())
         
         return node
@@ -150,7 +150,7 @@ class Parser:
 
         while self.current_token.type in (BOOLEANCONJUNCTION, BOOLEANDISJUNCTION):
             op_token = self.current_token
-            self.eat(self.current_token.type)
+            self.match(self.current_token.type)
             node = BinOp(node, op_token, self.code())
         
         return node
@@ -167,12 +167,12 @@ class Parser:
         """
         log("Code")
         if self.current_token.type == LPAREN:
-            self.eat(LPAREN)
+            self.match(LPAREN)
             if self.current_token.type == RPAREN:
                 node = UnitNode()
             else:
                 node = self.block()
-            self.eat(RPAREN)
+            self.match(RPAREN)
         elif self.current_token.type == BEGIN:
             node = self.sequence()
         else:
@@ -189,21 +189,21 @@ class Parser:
         Return UnitNode or a Sequence node
         """
         log("Sequence")
-        self.eat(BEGIN)
+        self.match(BEGIN)
         
         """BEGIN END"""
         if self.current_token.type == END:
-            self.eat(END)
+            self.match(END)
             return UnitNode()
         
         """BEGIN block (SEMI block)* END"""
         blocks_list = [self.block()]
 
         while self.current_token.type == SEMI:
-            self.eat(SEMI)
+            self.match(SEMI)
             blocks_list.append(self.block())
         
-        self.eat(END)
+        self.match(END)
 
         return Sequence(blocks_list)
 
@@ -226,29 +226,29 @@ class Parser:
         if self.current_token.type in (INT, FLOAT, STRING):
             """INT | FLOAT | STRING"""
             node = Literal(self.current_token.value, self.current_token.type)
-            self.eat(self.current_token.type)
+            self.match(self.current_token.type)
             return node
         elif self.current_token.type == LET:
             """assignment_statement"""
             return self.assignment_statement()
         elif self.current_token.type == WHILE:
             """WHILE block DO block DONE"""
-            self.eat(WHILE)
+            self.match(WHILE)
             boolean_node = self.block()
-            self.eat(DO)
+            self.match(DO)
             block_node = self.block()
-            self.eat(DONE)
+            self.match(DONE)
             return Loop(boolean_node, block_node)
         elif self.current_token.type == IF:
             """IF block THEN block (ELSE block)?"""
-            self.eat(IF)
+            self.match(IF)
             condition_node = self.block()
 
-            self.eat(THEN)
+            self.match(THEN)
             then_node = self.block()
 
             if self.current_token.type == ELSE:
-                self.eat(ELSE)
+                self.match(ELSE)
                 else_node = self.block()
             else:
                 else_node = UnitNode()
@@ -256,11 +256,11 @@ class Parser:
             return ConditionalStatement(condition_node, then_node, else_node)
         elif self.current_token.type == PRINT_INT:
             """PRINT_INT block"""
-            self.eat(PRINT_INT)
+            self.match(PRINT_INT)
             return PrintInt(self.block())
         elif self.current_token.type == PRINT_STRING:
             """PRINT_STRING block"""
-            self.eat(PRINT_STRING)
+            self.match(PRINT_STRING)
             return PrintString(self.block())
         elif self.current_token.type == ID or self.current_token.type == EXCLAMATION:
             """variable_statement ->(ID|EXCLAMATION)"""
@@ -278,17 +278,17 @@ class Parser:
         Return a let_statement node
         """
         log("Assignment_statement")
-        self.eat(LET)
+        self.match(LET)
 
         assignments_list = [self.assignment()]
 
         while self.current_token.type == AND:
-            self.eat(AND)
+            self.match(AND)
             assignments_list.append(self.assignment())
         
         if self.current_token.type == IN:
             """LET assignment (AND assignment)* IN block"""
-            self.eat(IN)
+            self.match(IN)
             block = self.block()
         else:
             """LET assignment (AND assignment)*"""
@@ -310,12 +310,12 @@ class Parser:
         # The REC keyword will only be used if this is a function declaration. It won't raise an error.
         if self.current_token.type == REC:
             is_rec = True
-            self.eat(REC)
+            self.match(REC)
         else:
             is_rec = False
         
         var_name = self.current_token.value
-        self.eat(ID)
+        self.match(ID)
 
         # Currified function assignment
         if self.current_token.type != EQUALS:
@@ -330,20 +330,20 @@ class Parser:
 
                 if self.current_token.type == LPAREN:
                         """LPAREN RPAREN"""
-                        self.eat(LPAREN)
+                        self.match(LPAREN)
                         # NOTE: couples and tuples are currently not supported
-                        self.eat(RPAREN)
+                        self.match(RPAREN)
                         # It's an unit parameter
                         # We use the None parameter to represent an UNIT id
                         parameter_id = None
                 else:
                     """ID"""
                     parameter_id = self.current_token.value
-                    self.eat(ID)
+                    self.match(ID)
                     
                 parameters_list.append(parameter_id)
             
-            self.eat(EQUALS)
+            self.match(EQUALS)
 
             # The types are not yet determined
             parameters_types_list = [None] * len(parameters_list)
@@ -362,11 +362,11 @@ class Parser:
         # Non currified function or non function assignment
         else:
 
-            self.eat(EQUALS)
+            self.match(EQUALS)
 
             if self.current_token.type == FUNCTION:
                 # It's a function declaration
-                self.eat(FUNCTION)
+                self.match(FUNCTION)
                 parameters_list = []
 
                 # We need at least one (ID|LPAREN RPAREN) in the parameters_list.
@@ -378,20 +378,20 @@ class Parser:
                     
                     if self.current_token.type == LPAREN:
                         """LPAREN RPAREN"""
-                        self.eat(LPAREN)
+                        self.match(LPAREN)
                         # NOTE: couples and tuples are currently not supported
-                        self.eat(RPAREN)
+                        self.match(RPAREN)
                         # It's an unit parameter
                         # We use the None parameter to represent an UNIT id
                         parameter_id = None
                     else:
                         """ID"""
                         parameter_id = self.current_token.value
-                        self.eat(ID)
+                        self.match(ID)
                     
                     parameters_list.append(parameter_id)
 
-                self.eat(ARROW)
+                self.match(ARROW)
 
                 # The types are not yet determined
                 parameters_types_list = [None] * len(parameters_list)
@@ -410,7 +410,7 @@ class Parser:
                 # It's not a function declaration
                 # It's then a variable declaration
                 if self.current_token.type == REF:
-                    self.eat(REF)
+                    self.match(REF)
                     is_ref = True
                 else:
                     is_ref = False
@@ -429,19 +429,19 @@ class Parser:
 
         """EXCLAMATION ID"""
         if self.current_token.type == EXCLAMATION:
-            self.eat(EXCLAMATION)
+            self.match(EXCLAMATION)
             var_id = self.current_token.value
-            self.eat(ID)
+            self.match(ID)
             return Variable(var_id, get_content=True)
         
         """ID REASSIGN block
          | ID (code != nothing)*"""
         var_id = self.current_token.value
-        self.eat(ID)
+        self.match(ID)
 
         if self.current_token.type == REASSIGN:
             """ID REASSIGN block"""
-            self.eat(REASSIGN)
+            self.match(REASSIGN)
             return Reassignment(var_id, self.block())
         else:
             """ID (code != nothing)*"""
