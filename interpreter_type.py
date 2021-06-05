@@ -158,7 +158,7 @@ class InterpreterType(NodeVisitor):
             # We create a new symbol corresponding to the variable, the value is None as we are only searching the type
             symbol = SymbolVariable(node.var_name, node.is_ref, value=None, type=self.visit(node.value_node))
             self.memory_table.define(node.var_name, symbol)
-            show(colors.CYELLOW, f"Assigning: {node.var_name} with type {symbol.type}", colors.ENDC)
+            show(colors.YELLOW, f"Assigning: {node.var_name} with type {symbol.type}", colors.ENDC)
             # An assignement is of type UNIT
             return BUILTIN_TYPES["unit"]
         else:
@@ -256,10 +256,10 @@ class InterpreterType(NodeVisitor):
             function_symbol = SymbolFunction(function_id, parameters_list, parameters_types_list, function_node.function_body_node, result_type, is_recursive=node.is_recursive)
             self.memory_table.define(function_id, function_symbol)
 
-            print("Dfining function")
+            print("Defining function")
             print(self.memory_table)
             
-            show(colors.CYELLOW, f"Assigning function: {function_id} with parameters: {list(zip(parameters_list, parameters_types_list))} result type {result_type} and function_body_node:{function_node.function_body_node}", colors.ENDC)
+            show(colors.YELLOW, f"Assigning function: {function_id} with parameters: {list(zip(parameters_list, parameters_types_list))} result type {result_type} and function_body_node:{function_node.function_body_node}", colors.ENDC)
             # An assignement is of type UNIT
             
             # Type is of the form "int -> string -> string"
@@ -317,19 +317,19 @@ class InterpreterType(NodeVisitor):
             if symbol.isref:
                 if node.get_content:
                     # The variable is mutable and we are accessing its value (!var)
-                    show(colors.CYELLOW, f"Accessing content of mutable variable {node.var_name}", colors.ENDC)
+                    show(colors.YELLOW, f"Accessing content of mutable variable {node.var_name}", colors.ENDC)
                     return symbol.type
                 else:
                     # The variable is mutable
-                    show(colors.CYELLOW, f"Accessing mutable variable {node.var_name}", colors.ENDC)
-                    return ['ref', symbol.type]                 #TODO: use a symbol
+                    show(colors.YELLOW, f"Accessing mutable variable {node.var_name}", colors.ENDC)
+                    return ['ref', symbol.type]
             else:
                 if node.get_content:
                     # The variable is not mutable and we are accessing its value (!var)
                     raise SyntaxError("Variable not mutable but its content is accessed")
                 else:
                     # The variable is not mutable
-                    show(colors.CYELLOW, f"Accessing content of variable {node.var_name}", colors.ENDC)
+                    show(colors.YELLOW, f"Accessing content of variable {node.var_name}", colors.ENDC)
                     return symbol.type
 
     def visit_FunctionCall(self, node):

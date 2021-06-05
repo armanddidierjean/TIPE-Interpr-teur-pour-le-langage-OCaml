@@ -60,9 +60,85 @@ text = "let f = fun a b () -> 1 in f 1 't' ();;"
 
 text = "let f = fun a () c -> 1 in f 1 () 1;;"
 
+text = """
+let rec factorielle = fun n -> 
+    if n = 1 
+        then 1 
+        else n * factorielle (n-1)
+    in factorielle 6;;
+"""
+
+"""
+
+let time f =
+  let t = Unix.gettimeofday () in
+  let res = f () in
+  Printf.printf "Execution time: %f secondsn"
+                (Unix.gettimeofday () -. t);
+  res
+;;
+
+let time f x =
+    let t = Sys.time() in
+    let fx = f x in
+    Printf.printf "Execution time: %fs\n" (Sys.time() -. t);
+    fx;;
+
+let rec fibo = fun n ->
+    if n = 0
+        then 0
+        else if n = 1
+            then 1
+            else (fibo (n-1)) + (fibo (n-2))
+            
+        in time fibo 25;;
+
+
+Pour n = 20
+
+Sans loggin
+ Interpret result: INT - 6765 
+Downloaded the tutorial in 1.3433 seconds
+
+
+Avec loggin
+ Interpret result: INT - 6765 
+Downloaded the tutorial in 12.9806 seconds
+
+Pour n = 25, sans loggin
+
+ Interpret result: INT - 75025 
+Downloaded the tutorial in 15.5668 seconds
+
+n = 25, natif
+              Execution time: 0.003599s
+
+"""
+
+text = """
+let rec fibo = fun n ->
+    if n = 0
+        then 0
+        else if n = 1
+            then 1
+            else (fibo (n-1)) + (fibo (n-2))
+    in
+        fibo 25;;
+
+
+"""
+
+text = "let a b = b in begin print_int (a 1); a 'h' end;;"
+
+import time
+tic = time.perf_counter()
+
 lexer = Lexer(text)
 parser = Parser(lexer)
 node = parser.program()
+
+
+
 
 #interpreter_show = InterpreterShow(node)
 #interpreter_show.interpret()
@@ -80,7 +156,9 @@ value_res = interpreter_value.interpret()
 
 print(colors.OKBLUE, "Interpret result:", type_res, "-", value_res, colors.ENDC)
 
+toc = time.perf_counter()
 
+print(f"Downloaded the tutorial in {toc - tic:0.4f} seconds")
 
 #test()
 

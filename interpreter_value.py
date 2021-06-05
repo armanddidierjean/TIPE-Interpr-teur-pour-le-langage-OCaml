@@ -136,7 +136,7 @@ class InterpreterValue(NodeVisitor):
         # the type is None as we don't use types in InterpreterValue
         
         self.memory_table.define(node.var_name, symbol)
-        show(colors.CYELLOW, f"Assigning Variable: {node.var_name} with type {symbol.type}, isref = {symbol.isref}", colors.ENDC)
+        show(colors.YELLOW, f"Assigning Variable: {node.var_name} with type {symbol.type}, isref = {symbol.isref}", colors.ENDC)
 
     """ TODO: remove
     def visit_AssignmentFunction(self, node):
@@ -147,7 +147,7 @@ class InterpreterValue(NodeVisitor):
         # the type is None as we don't use types in InterpreterValue
         
         self.memory_table.define(node.var_name, symbol)
-        show(colors.CYELLOW, f"Assigning Variable: {node.var_name} with type {symbol.type}, isref = {symbol.isref}", colors.ENDC)
+        show(colors.YELLOW, f"Assigning Variable: {node.var_name} with type {symbol.type}, isref = {symbol.isref}", colors.ENDC)
     """
 
     def visit_AssignmentFunction(self, node):
@@ -171,7 +171,7 @@ class InterpreterValue(NodeVisitor):
         
         self.memory_table.define(function_id, function_symbol)
         
-        show(colors.CYELLOW, f"Assigning function: {function_id} with parameters: {parameters_list} and function_body_node:{function_node.function_body_node}", colors.ENDC)
+        show(colors.YELLOW, f"Assigning function: {function_id} with parameters: {parameters_list} and function_body_node:{function_node.function_body_node}", colors.ENDC)
 
     def visit_Reassignment(self, node):
         log("Visiting Reassignment")
@@ -188,7 +188,7 @@ class InterpreterValue(NodeVisitor):
 
         if node.get_content:
             # InterpreterType checked the variable is mutable
-            show(colors.CYELLOW, f"Accessing content of mutable variable {node.var_name}", colors.ENDC)
+            show(colors.YELLOW, f"Accessing content of mutable variable {node.var_name}", colors.ENDC)
             return symbol.value
         
         else:

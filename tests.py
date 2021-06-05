@@ -28,6 +28,7 @@ def test():
         (15, "- 1 + 1;;", BUILTIN_TYPES["int"], -2),          # Unary Op, !right associative!
         (16, "1 - 1 + 1;;", BUILTIN_TYPES["int"], 1),         # Binary Op
         (17, "let f a = a in begin f 1; f 'i' end;;", BUILTIN_TYPES["string"], 'i'),
+        (18, "let a b = b in begin print_int (a 1); a 'h' end;;", BUILTIN_TYPES["string"], 'h'),
     ]
     # Liste des erreurs rencontrées
     errors_list = []

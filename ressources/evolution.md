@@ -1,5 +1,17 @@
 # TODO
 
+Warning: officially there can not be more than 26 quote type. We should maybe change letter identifier by integer for quote type. We could just convert the identifier to a letter in __str__
+
+Suggérer d'ajouter le mot clef `rec` lors de la définition d'une fonction qui s'appelle dans sa définition. Pour le moment, il y a une erreur `MemoryError: fibo is not defined in function call`
+
+Suggérer l'ajout de SEMI SEMI si on trouve un EOF. Currently : `TypeError: Expected SEMI token, got EOF`
+
+Attention, on peut fixer les symboles quote en les évaluants ce qui ne devrait pas arriver. Il faudra ajouter une option in_definition qui indique ci il faut arrêter de fixer le type
+
+Il n'y a pas de visit_Function. On pourrait/devrait peut-être supprimer ce noeud. Il est utilisé dans la mémoire comme symbole je crois. Pourquoi n'est-ce pas un symbole dans ce cas mais un AST ?
+
+Se renseigner sur l'histoire des compilateurs
+
 Implementer un **panic mode** error recovery?
     - require a class for error handling
 
