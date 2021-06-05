@@ -8,6 +8,7 @@
         "LPAREN",
         "OKBLUE",
         "OKGREEN",
+        "PAREN",
         "RPAREN",
         "UNARYOP",
         "currified",
@@ -18,6 +19,8 @@
         "isdigit",
         "islower",
         "isref",
-        "loggin"
+        "loggin",
+        "reassignement",
+        "toplevel"
     ]
 }

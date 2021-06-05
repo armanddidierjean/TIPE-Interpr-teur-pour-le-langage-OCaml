@@ -1,25 +1,26 @@
 # TODO
 
-Warning: officially there can not be more than 26 quote type. We should maybe change letter identifier by integer for quote type. We could just convert the identifier to a letter in __str__
+~~Warning: officially there can not be more than 26 quote type. We should maybe change letter identifier by integer for quote type. We could just convert the identifier to a letter in __str__~~ Done
 
-Suggérer d'ajouter le mot clef `rec` lors de la définition d'une fonction qui s'appelle dans sa définition. Pour le moment, il y a une erreur `MemoryError: fibo is not defined in function call`
+Suggérer d'ajouter le mot clef `rec` lors de la définition d'une fonction qui s'appelle dans sa définition. Pour le moment, il y a une erreur `MemoryError: fibonacci is not defined in function call`
 
 Suggérer l'ajout de SEMI SEMI si on trouve un EOF. Currently : `TypeError: Expected SEMI token, got EOF`
 
-Attention, on peut fixer les symboles quote en les évaluants ce qui ne devrait pas arriver. Il faudra ajouter une option in_definition qui indique ci il faut arrêter de fixer le type
+~~Attention, on peut fixer les symboles quote en les évaluants ce qui ne devrait pas arriver. Il faudra ajouter une option in_definition qui indique ci il faut arrêter de fixer le type~~ Done
 
-Il n'y a pas de visit_Function. On pourrait/devrait peut-être supprimer ce noeud. Il est utilisé dans la mémoire comme symbole je crois. Pourquoi n'est-ce pas un symbole dans ce cas mais un AST ?
+Il n'y a pas de visit_Function. On pourrait/devrait peut-être supprimer ce nœud. Il est utilisé dans la mémoire comme symbole je crois. Pourquoi n'est-ce pas un symbole dans ce cas mais un AST ?
 
 Se renseigner sur l'histoire des compilateurs
 
 Implementer un **panic mode** error recovery?
     - require a class for error handling
 
-Replace `eat()` by `match`
-Add `peek()`
+~~Replace `eat()` by `match`~~ Done
+Add `peek()` in the parser. *Why? It's not useful*
 
 Est-ce que nous utiliserions cette stratégie pour s'assurer d'un string est fermé ? [string / crafting interpreters](http://craftinginterpreters.com/scanning.html#string-literals)
-Ajouter un `.isNotEnded` in the Lexer
+
+~~Ajouter un `.isNotEnded` in the Lexer~~ Done
 
 Modifier les noms des keywords
       case '*': addToken(STAR); break; 
@@ -27,10 +28,12 @@ Modifier les noms des keywords
       case ')': addToken(RIGHT_PAREN); break;
       case '{': addToken(LEFT_BRACE); break;
       case '}': addToken(RIGHT_BRACE); break;
+*Why? It's not used*
 
-Mémoriser dans le Token la position du token
+~~Mémoriser dans le Token la position du token~~ Done
 
 Devrions nous utiliser des fonctions personnalisées pour la gestion des erreurs ? Cela permettrait d'afficher la ligne ainsi que sa position dans le code. Le mieux serait de passer au différents objets (Lexer, Parser, Interpreter) une classe qui implémente des fonctions d'affichage d'erreur (cela permettrait de les logger dans un fichier, les printer dans la console). Voir [Errors handling / crafting interpreters](http://craftinginterpreters.com/scanning.html#error-handling)
+*Partially done: the fundamentals are in place but error position is not implement by the errorsManager*
 
 Indicate were errors happened during the lexing process by returning `self.current_pos` in the error
 
@@ -91,7 +94,7 @@ TODO: rename content_node -> function_node
 Permettre d'avoir des elements vide: LPAREN RPAREN ou BEGIN END
 * Concatenate
 * If statement
-* fail_withs
+* fail_with
 
 Créer plusieurs classes de symboles:
     var (id, value, type, isref)
