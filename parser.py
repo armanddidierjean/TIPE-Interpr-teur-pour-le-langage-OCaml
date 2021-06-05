@@ -152,14 +152,14 @@ class Parser:
             op_token = self.current_token
             self.match(self.current_token.type)
             node = BinOp(node, op_token, self.code())
-        
         return node
     
     def code(self):
         """
           LPAREN block? RPAREN                            =>   LPAREN RPAREN should return UnitNode
                                                                LPAREN block RPAREN return self.block()
-                                                               Calling self.block when the code is LPAREN RPAREN would return NothingNode
+                                                               Calling self.block when the code is 
+                                                               LPAREN RPAREN would return NothingNode
         | sequence      -> (BEGIN)
         | command
 
@@ -275,7 +275,7 @@ class Parser:
         LET assignment (AND assignment)* IN block
         LET assignment (AND assignment)*                => NOTE: for the moment we just use an UnitNode as the IN block
 
-        Return a let_statement node
+        Return a AssignmentStatement node
         """
         log("Assignment_statement")
         self.match(LET)
@@ -299,11 +299,11 @@ class Parser:
     
     def assignment(self):
         """
-        REC? ID (ID|LPAREN RPAREN)+ EQUAL block                     => Currified function assignment
+        REC? ID (ID|LPAREN RPAREN)+ EQUAL block                  => Currified function assignment
         REC? ID EQUALS FUNCTION (ID|LPAREN RPAREN)+ ARROW block
-        REC? ID EQUALS REF? block                                   => The REC won't be used nor raise an error
+        REC? ID EQUALS REF? block                                => The REC won't be used nor raise an error
 
-        Return assignment node
+        Return an AssignmentFunction or an AssignmentVariable node
         """
         log("Assignment")
 
@@ -316,6 +316,7 @@ class Parser:
         
         var_name = self.current_token.value
         self.match(ID)
+
 
         # Currified function assignment
         if self.current_token.type != EQUALS:
@@ -422,7 +423,7 @@ class Parser:
         """
           EXCLAMATION ID
         | ID REASSIGN block
-        | ID (block != nothing)*        => If there is no block, its a variable
+        | ID (block != nothing)*        => If there is no block, it's a variable
                                            else, it's a function call
         """
         log("Variable Statement")

@@ -93,8 +93,8 @@ class InterpreterValue(NodeVisitor):
         # An assignement statement can create a new memory table with local variables 
         # or define variables in the current memory table
 
-        # The syntax (LET assignments IN block) create a new memory table of level: current level + 1
-        # The syntax (LET assignments) define variables in the current memory level
+        # The syntax (LET assignments IN block) creates a new memory table of level: current level + 1
+        # The syntax (LET assignments) defines variables in the current memory level
 
         # We need to create a new memory table if node.block_node is not an instance of UnitNode
         #create_a_new_memory_table = not isinstance(node.block_node, UnitNode)
@@ -163,7 +163,7 @@ class InterpreterValue(NodeVisitor):
     
     def visit_Variable(self, node):
         log("Visiting Variable")
-        log(f"Searshing the variable {node.var_name} {node.get_content}")
+        log(f"Searching the variable {node.var_name} {node.get_content}")
         
         symbol = self.memory_table.get(node.var_name)
 

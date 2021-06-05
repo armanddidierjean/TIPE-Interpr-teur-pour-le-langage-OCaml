@@ -46,7 +46,7 @@ class NodeVisitor(object):
     Methods
     -------
     visit(node)
-        Call the visitType(node) methode corresponding to the node type
+        Call the visit_Type(node) methode corresponding to the node type
     """
     def visit(self, node):
         method_name = 'visit_' + type(node).__name__

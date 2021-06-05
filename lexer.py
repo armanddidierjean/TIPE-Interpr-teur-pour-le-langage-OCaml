@@ -41,7 +41,7 @@ class Lexer:
 
     def advance(self, nb=1):
         """
-        Update the current charactere:
+        Update the current character:
          - modify self.current_pos
          - modify self.current_char
 
@@ -93,7 +93,7 @@ class Lexer:
         Return an id: an alphanumeric string forming a word
         Accepted characters:
             a-z, A-Z, 1-9, _
-        The function get_next_token will check the first character is a-Z, A-Z before calling this the method.
+        The function get_next_token will check the first character is a-Z, A-Z before calling this method
         """
         result = ''
         while self.isNotEnd() and (self.current_char.isalnum() or self.current_char == '_'):
@@ -139,7 +139,7 @@ class Lexer:
         self.advance()
 
         result = ''
-        # We are expecting a second delimiter so we can suppose the string wont be finished before we found it
+        # We are expecting a second delimiter
         while self.isNotEnd() and self.current_char != delimiter:
             # NOTE: currently \n and \t are not preserved
             # Escaped character: \" \' ...
@@ -298,4 +298,4 @@ class Lexer:
             self.advance(2)
             return Token(BOOLEANDISJUNCTION, '||', current_pos, 2)
 
-        errorsManager.SyntaxError("Invalid charactere")
+        errorsManager.SyntaxError("Invalid character")

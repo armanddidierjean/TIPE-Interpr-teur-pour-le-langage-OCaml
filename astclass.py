@@ -2,7 +2,7 @@
 #     AST  Nodes    #
 #####################
 """
-Class used to genrate the tree representing a program
+Class used to generate the tree representing a program
 """
 
 class AST:
