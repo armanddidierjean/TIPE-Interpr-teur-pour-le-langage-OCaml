@@ -54,7 +54,7 @@ class NodeVisitor(object):
         return visitor(node)
     
     def generic_visit(self, node):
-        raise Exception(f'No visit_{type(node).__name__} method')
+        errorsManager.Exception(f'No visit_{type(node).__name__} method')
 
 #####################
 #      Memory       #

@@ -85,10 +85,10 @@ class InterpreterType(NodeVisitor):
         if node.op_token.type in (PLUS_INT, MINUS_INT, MUL_INT, DIV_INT):
             left_type = self.visit(node.left_node)
             if left_type != BUILTIN_TYPES["int"]:
-                error(f"Left node {node.left_node} is of type {left_type} instead of INTEGER in Binary Operation {node.op_token.type}")
+                errorsManager.TypeError(f"Left node {node.left_node} is of type {left_type} instead of INTEGER in Binary Operation {node.op_token.type}")
             right_type = self.visit(node.right_node)
             if right_type != BUILTIN_TYPES["int"]:
-                error(f"Right node {node.right_node} is of type {right_type} instead of INTEGER in Binary Operation {node.op_token.type}")
+                errorsManager.TypeError(f"Right node {node.right_node} is of type {right_type} instead of INTEGER in Binary Operation {node.op_token.type}")
             return BUILTIN_TYPES["int"]
         # Boolean operation
         # The left and right nodes should have the same type
@@ -96,10 +96,10 @@ class InterpreterType(NodeVisitor):
             left_type = self.visit(node.left_node)
             right_type = self.visit(node.right_node)
             if left_type != right_type:
-                error(f"Left node {node.left_node} is of type {left_type} and right node {node.right_node} of type {right_type} which are not the same in Boolean Binary Operation {node.op_token.type}")
+                errorsManager.TypeError(f"Left node {node.left_node} is of type {left_type} and right node {node.right_node} of type {right_type} which are not the same in Boolean Binary Operation {node.op_token.type}")
             return BUILTIN_TYPES["bool"]
         
-        error("Undefined operation BinOp", node.op_token.type)
+        errorsManager.SyntaxError("Undefined operation BinOp", node.op_token.type)
         return BUILTIN_TYPES["unit"]
 
     def visit_UnaryOp(self, node):
@@ -107,9 +107,9 @@ class InterpreterType(NodeVisitor):
         if node.op_token.type in (PLUS_INT, MINUS_INT):
             type = self.visit(node.right_node)
             if type != BUILTIN_TYPES["int"]:
-                error(f"Unary node {node.right_node} is of type {type} instead of INTEGER in Unary Operation {node.op_token.type}")
+                errorsManager.TypeError(f"Unary node {node.right_node} is of type {type} instead of INTEGER in Unary Operation {node.op_token.type}")
             return BUILTIN_TYPES["int"]
-        error("Undefined operation UnaryOp")
+        errorsManager.SyntaxError("Undefined operation UnaryOp")
         return BUILTIN_TYPES["unit"]
     
     def visit_AssignmentStatement(self, node):
@@ -137,7 +137,7 @@ class InterpreterType(NodeVisitor):
             assignement_type = self.visit(assignment_node)
             # The type of the assignments should be unit
             if assignement_type != BUILTIN_TYPES["unit"]:
-                warning(f"{assignment_node} is of type {type} instead of unit in assignment statement")
+                errorsManager.TypeWarning(f"{assignment_node} is of type {type} instead of unit in assignment statement")
         
         result_type = self.visit(node.block_node)
 
@@ -161,8 +161,7 @@ class InterpreterType(NodeVisitor):
             # An assignement is of type UNIT
             return BUILTIN_TYPES["unit"]
         else:
-            error("Memory error:", node.var_name, "is already defined in the current memory table")
-            raise SyntaxError("Variable already defined")
+            errorsManager.SyntaxError(f"Memory error: {node.var_name} is already defined in the current memory table")
     
     def visit_AssignmentFunction(self, node):
         log("Visiting AssignmentFunction")
@@ -267,37 +266,33 @@ class InterpreterType(NodeVisitor):
 
             return BUILTIN_TYPES["unit"]
         else:
-            error("Memory error:", node.var_name, "is already defined in the current memory table")
-            raise SyntaxError("Variable already defined")
+            errorsManager.SyntaxError(f"Memory error: {node.var_name} is already defined in the current memory table")
 
     def visit_Reassignment(self, node):
         log("Visiting Reassignment")
         if self.memory_table.isdefined(node.var_name):
             symbol = self.memory_table.get(node.var_name)
             if symbol.symbol_type != "Variable":
-                error("It's not a variable")
-                raise SyntaxError("It's not a variable")
+                errorsManager.SyntaxError("It's not a variable")
             else:
                 if symbol.isref:
                     # The variable can be reassigned
                     value_type = self.visit(node.new_value_node)
                     if symbol.type != value_type:
-                        error(f"New value node {node.new_value_node} is of type {value_type} instead of {symbol.type} in Reassignment of {node.var_name}")
+                        errorsManager.TypeError(f"New value node {node.new_value_node} is of type {value_type} instead of {symbol.type} in Reassignment of {node.var_name}")
                     # A reassignement is of type UNIT
                     return BUILTIN_TYPES["unit"]
                 else:
-                    error("Memory error:", node.var_name, "is not mutable")
-                    raise SyntaxError("Variable not mutable")
+                    errorsManager.SyntaxError(f"Memory error: {node.var_name} is not mutable")
         else:
-            error("Memory error:", node.var_name, "is not defined")
-            raise SyntaxError("Variable not defined")
+            errorsManager.SyntaxError(f"Memory error: {node.var_name} is not defined")
         
     def visit_Variable(self, node):
         log("Visiting Variable")
         log(f"Searshing the variable {node.var_name} {node.get_content}")
         
         if not self.memory_table.isdefined(node.var_name, look_following_table=True):
-            raise MemoryError(f"The variable {node.var_name} is not defined")
+            errorsManager.MemoryError(f"The variable {node.var_name} is not defined")
         else:
             # The variable is defined, we can access it
             symbol = self.memory_table.get(node.var_name)
@@ -315,7 +310,7 @@ class InterpreterType(NodeVisitor):
             else:
                 if node.get_content:
                     # The variable is not mutable and we are accessing its value (!var)
-                    raise SyntaxError("Variable not mutable but its content is accessed")
+                    errorsManager.SyntaxError("Variable not mutable but its content is accessed")
                 else:
                     # The variable is not mutable
                     show(colors.YELLOW, f"Accessing content of variable {node.var_name}", colors.ENDC)
@@ -330,19 +325,19 @@ class InterpreterType(NodeVisitor):
 
         # We check the symbol is defined before accessing it
         if not self.memory_table.isdefined(function_id):
-            raise MemoryError(f"{function_id} is not defined in function call")
+            errorsManager.MemoryError(f"{function_id} is not defined in function call")
         
         function_symbol = self.memory_table.get(function_id)
 
         # We check it's a function and thus a callable object
         if not function_symbol.symbol_type == "Function":
-            raise SyntaxError(f"function_id is not callable in function call")
+            errorsManager.SyntaxError(f"function_id is not callable in function call")
         
         # We need to check the type of each parameter correspond to the type of arguments given in the call
         parameters_types_list = function_symbol.parameters_types_list
 
         if not len(parameters_types_list) == len(given_arguments_nodes_list):
-            raise SyntaxError(f"Invalid arguments given in function call. Expected {len(given_arguments_nodes_list)} arguments got {len(parameters_types_list)}")
+            errorsManager.SyntaxError(f"Invalid arguments given in function call. Expected {len(given_arguments_nodes_list)} arguments got {len(parameters_types_list)}")
         
         # We need to lock **all** quote object after the function definition, before its call
         # Every time we will create a such symbole we will add it here
@@ -380,7 +375,7 @@ class InterpreterType(NodeVisitor):
             # The following comparison check the types match but also
             # Resolve quote types. See SymbolQuoteType class in baseclass.py
             if not expected_parameter_type == actual_type_given:
-                raise TypeError(f"Invalid argument in function call. Expected argument of type {expected_parameter_type} got {actual_type_given}")
+                errorsManager.TypeError(f"Invalid argument in function call. Expected argument of type {expected_parameter_type} got {actual_type_given}")
             
         # The result_type should have been resolved by the previous comparaisons
         result_type = function_symbol.result_type.get_symbol_type()
@@ -393,7 +388,7 @@ class InterpreterType(NodeVisitor):
                 result_type = quote_type_correspondance[result_type.numeric_id]
             else:
                 # If a local type has not been created, that should mean the type had to be resolved in the function definition
-                warning("The return quote type was be resolved in function call, it should have been resolved in the function definition")
+                errorsManager.TypeWarning("The return quote type was be resolved in function call, it should have been resolved in the function definition")
 
         # We lock all quote symbol.
         for quote_symbol in used_quote_symbol_objects:
@@ -404,32 +399,32 @@ class InterpreterType(NodeVisitor):
     def visit_PrintInt(self, node):
         type = self.visit(node.node)
         if type != BUILTIN_TYPES["int"]:
-            error(f"Got {type} instead of INT in PrintInt")
+            errorsManager.TypeError(f"Got {type} instead of INT in PrintInt")
         return BUILTIN_TYPES["unit"]
 
     def visit_PrintString(self, node):
         type = self.visit(node.node)
         if type != BUILTIN_TYPES["string"]:
-            error(f"Got {type} instead of STRING in PrintString")
+            errorsManager.TypeError(f"Got {type} instead of STRING in PrintString")
         return BUILTIN_TYPES["unit"]
     
     def visit_Loop(self, node):
         bool_type = self.visit(node.boolean_node)
         if bool_type != BUILTIN_TYPES["bool"]:
-            error(f"Boolean_node is of type {bool_type} instead of BOOL in Loop")
+            errorsManager.TypeError(f"Boolean_node is of type {bool_type} instead of BOOL in Loop")
         block_type = self.visit(node.block_node)
         if block_type != BUILTIN_TYPES["unit"]:
-            warning(f"Block node is of type {block_type} instead of UNIT in Loop")
+            errorsManager.TypeWarning(f"Block node is of type {block_type} instead of UNIT in Loop")
         return BUILTIN_TYPES["unit"]
     
     def visit_ConditionalStatement(self, node):
         condition_type = self.visit(node.condition_node)
         if condition_type != BUILTIN_TYPES["bool"]:
-            error(f"Condition_node is of type {condition_type} instead of BOOL in ConditionalStatement")
+            errorsManager.TypeError(f"Condition_node is of type {condition_type} instead of BOOL in ConditionalStatement")
         then_type = self.visit(node.then_node)
         else_type = self.visit(node.else_node)
         if then_type != else_type:
-            error(f"Two then block is of type {then_type} but else block of type {else_type} in ConditionalStatement")
+            errorsManager.TypeError(f"Two then block is of type {then_type} but else block of type {else_type} in ConditionalStatement")
         return then_type
     
     def visit_UnitNode(self, node):

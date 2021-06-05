@@ -37,7 +37,7 @@ class Parser:
         if self.current_token.type == type:
             self.current_token = self.lexer.get_next_token()
         else:
-            raise TypeError(f"Expected {type} token, got {self.current_token.type}")
+            errorsManager.TypeError(f"Expected {type} token, got {self.current_token.type}")
 
     def parse(self):
         return self.program()
@@ -268,7 +268,6 @@ class Parser:
         else:
             """nothing"""
             # The nothing command is used to determine the end of a function call
-            # TODO: Improve class distinction NothingClass/UnitNode
             return NothingClass()
 
     def assignment_statement(self):
@@ -373,7 +372,7 @@ class Parser:
                 # We need at least one (ID|LPAREN RPAREN) in the parameters_list.
                 # If we pass the following test, we should have parameters declared
                 if self.current_token.type == ARROW:
-                    raise SyntaxError("Expected at least one parameter in the function declaration, got none")
+                    errorsManager.SyntaxError("Expected at least one parameter in the function declaration, got none")
 
                 while self.current_token.type != ARROW:
                     

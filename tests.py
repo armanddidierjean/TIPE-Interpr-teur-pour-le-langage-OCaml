@@ -96,7 +96,6 @@ def errors_test():
         # An error is expected to occurs
         try:
             lexer = Lexer(test)
-            raise RuntimeError(f"Test failure {test[0]} : {test[2]}")
         except:
             pass
 

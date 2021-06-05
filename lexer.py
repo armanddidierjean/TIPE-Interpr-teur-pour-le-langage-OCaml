@@ -1,5 +1,6 @@
 from baseclass import *
 from keywords import *
+from tools import *
 
 #####################
 #       Lexer       #
@@ -156,7 +157,7 @@ class Lexer:
             return Token(STRING, result, pos, len(result))
         else:
             # The code was entirely read but the string was not closed
-            raise SyntaxError("The string was not closed")
+            errorsManager.SyntaxError("The string was not closed")
 
     def pass_comment(self):
         """
@@ -176,15 +177,15 @@ class Lexer:
             # Pass the '*)'
             self.advance(2)
         else:
-            raise SyntaxError("The comment was not closed")
+            errorsManager.SyntaxError("The comment was not closed")
 
     def get_next_token(self):
         """
         Parse and return the next token found in text
         Return EOF when all tokens have been parsed
 
-        Raises
-        ------
+        Raise
+        -----
         SyntaxError
             If a not defined character is found
         """
@@ -297,4 +298,4 @@ class Lexer:
             self.advance(2)
             return Token(BOOLEANDISJUNCTION, '||', current_pos, 2)
 
-        raise SyntaxError("Invalid charactere")
+        errorsManager.SyntaxError("Invalid charactere")

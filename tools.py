@@ -41,5 +41,28 @@ class ErrorsManager():
         self.errorsPile.extend(list)
     def get(self):
         return self.errorsPile
+    
+    def warning(self, arg):
+        if SHOW_WARNING:
+            print(colors.WARNING, arg, colors.ENDC)
+    
+    def error(self, arg):
+        errorsManager.extend(arg)
+        print(colors.FAIL, arg, colors.ENDC)
 
+    def SyntaxError(self, message):
+        self.error(message)
+    
+    def MemoryError(self, message):
+        self.error(message)
+    
+    def TypeError(self, message):
+        self.error(message)
+    
+    def TypeWarning(self, message):
+        self.warning(message)
+
+    def Exception(self, message):
+        self.error(message)
+    
 errorsManager = ErrorsManager()
