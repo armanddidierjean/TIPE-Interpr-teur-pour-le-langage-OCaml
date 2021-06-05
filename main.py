@@ -165,10 +165,10 @@ print(f"Downloaded the tutorial in {toc - tic:0.4f} seconds")
 """
 
 # Function declaration
-node = Program(Block(AssignmentStatement([AssignmentFunction("f", Function(["a"], [INT], PrintInt(Num(3, INT))))], Block(Num(4, INT)))))
+node = Program(Block(AssignmentStatement([AssignmentFunction("f", Function(["a"], [INT], PrintInt(Literal(3, INT))))], Block(Literal(4, INT)))))
 # Function declaration and call
 # -> UNIT
-node = Program(Block(AssignmentStatement([AssignmentFunction("f", Function(["a"], [INT], PrintInt(Num(3, INT))))], Block(FunctionCall("f", [Num(1, INT)])))))
+node = Program(Block(AssignmentStatement([AssignmentFunction("f", Function(["a"], [INT], PrintInt(Literal(3, INT))))], Block(FunctionCall("f", [Literal(1, INT)])))))
 # -> INT
-node = Program(Block(AssignmentStatement([AssignmentFunction("f", Function(["a"], [INT], Num(3, INT)))], Block(FunctionCall("f", [Num(1, INT)])))))
+node = Program(Block(AssignmentStatement([AssignmentFunction("f", Function(["a"], [INT], Literal(3, INT)))], Block(FunctionCall("f", [Literal(1, INT)])))))
 """

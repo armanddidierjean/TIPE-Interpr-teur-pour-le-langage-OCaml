@@ -72,7 +72,7 @@ BinOp(left_node, op_token, right_node)
 UnaryOp(op_token, right_node)
 
 # Commands
-Num(value, type)
+Literal(value, type)
 AssignmentStatement(assignments_list, block_node)
 Loop(boolean_node, block_node)
 PrintInt(node)

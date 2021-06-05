@@ -13,12 +13,12 @@ class Parser:
     -------
     parse()
         Parse the lexer's tokens flow and 
-        return and AST node corresponding to the recognized pattern 
+        return an AST node
 
     Parameters
     ----------
     lexer:
-        a lexer that will be called to get the tokens flow
+        a lexer that will be used to get the tokens flow
     """
     def __init__(self, lexer):
         self.lexer = lexer
@@ -26,14 +26,14 @@ class Parser:
     
     def eat(self, type):
         """
-        Check if the current token is of type type and get the next token from the lexer
+        Check if the current token is of type `type` and get the next token from the lexer
 
         Parameters
         ----------
         type : Keyword
             expected type of self.current_token
         """
-        log(f"-> Eating {self.current_token} expecting type {type}")
+        log(f"-> Matching {self.current_token} expecting type {type}")
         if self.current_token.type == type:
             self.current_token = self.lexer.get_next_token()
         else:
@@ -45,8 +45,8 @@ class Parser:
     def program(self):
         """ 
         block? SEMI SEMI
-        
-        Return Program node
+
+        Return a Program node
         """
         log("Program")
         if self.current_token.type != SEMI:
@@ -59,29 +59,11 @@ class Parser:
     
     def block(self):
         """
-          # TODO: Remove @LPARENRPAREN
-          #LPAREN block? RPAREN
-        | pres0
+        pres0
 
-        USED FOR A BINOP
+        Does not return its own node
         """
         log("Block")
-        
-        # Removed to put LPAREN block? RPAREN in code
-        # TODO: should work without. Remove this code Remove @LPARENRPAREN
-        #if self.current_token.type == LPAREN:
-        #    self.eat(LPAREN)
-        #    """LPAREN RPAREN"""
-        #    if self.current_token.type == RPAREN:
-        #        log("This block is a UnitNode")
-        #        self.eat(RPAREN)
-        #        return UnitNode()
-        #    """LPAREN block RPAREN"""
-        #    node = self.block()
-        #    self.eat(RPAREN)
-        #    return node
-        #else:
-        #    return self.pres0()
         return self.pres0()
 
     def pres0(self):
@@ -90,14 +72,13 @@ class Parser:
         | MINUS block
         | pres1 ((PLUS | MINUS) pres1)*
 
-        USED FOR A BINOP OR AN UNARYOP
+        Return a BinaryOperation or a UnaryOperation
         """
         log("Pres0")
 
         """PLUS block | MINUS block"""
         if self.current_token.type in (PLUS_INT, MINUS_INT):
             op_token = self.current_token
-            #log("pres0 is eating a self type:", self.current_token)
             self.eat(self.current_token.type)
             block_node = self.block()
             return UnaryOp(op_token, block_node)
@@ -106,7 +87,6 @@ class Parser:
             node = self.pres1()
             while self.current_token.type in (PLUS_INT, MINUS_INT):
                 op_token = self.current_token
-                #log("pres0 is eating a self type2:", self.current_token)
                 self.eat(self.current_token.type)
                 node = BinOp(node, op_token, self.pres1())
             return node
@@ -115,14 +95,13 @@ class Parser:
         """
         pres2 (MOD pres2)*
 
-        USED FOR A BINOP
+        Return a BinaryOperation
         """
         log("Pres1")
         node = self.pres2()
 
         while self.current_token.type == MOD:
             op_token = self.current_token
-            #log("pres1 is eating a self type:", self.current_token)
             self.eat(self.current_token.type)
             node = BinOp(node, op_token, self.pres2())
         
@@ -132,14 +111,13 @@ class Parser:
         """
         pres3 (MUL pres3)*
 
-        USED FOR A BINOP
+        Return a BinaryOperation
         """
         log("Pres2")
         node = self.pres3()
 
         while self.current_token.type == MUL_INT:
             op_token = self.current_token
-            #log("pres2 is eating a self type:", self.current_token)
             self.eat(self.current_token.type)
             node = BinOp(node, op_token, self.pres3())
         
@@ -149,14 +127,13 @@ class Parser:
         """
         pres4 ((EQUAL | DIFFERENT) pres4)*
 
-        USED FOR A BINOP
+        Return a BinaryOperation
         """
         log("Pres3")
         node = self.pres4()
 
         while self.current_token.type in (EQUALS, DIFFERENT):
             op_token = self.current_token
-            #log("pres3 is eating a self type:", self.current_token)
             self.eat(self.current_token.type)
             node = BinOp(node, op_token, self.pres4())
         
@@ -166,14 +143,13 @@ class Parser:
         """
         code ((BOOLEANCONJUNCTION | BOOLEANDISJUNCTION) code)*
 
-        USED FOR A BINOP
+        Return a BinaryOperation
         """
         log("pres4")
         node = self.code()
 
         while self.current_token.type in (BOOLEANCONJUNCTION, BOOLEANDISJUNCTION):
             op_token = self.current_token
-            #log("pres4 is eating a self type:", self.current_token)
             self.eat(self.current_token.type)
             node = BinOp(node, op_token, self.code())
         
@@ -181,11 +157,13 @@ class Parser:
     
     def code(self):
         """
-          LPAREN block? RPAREN                            => On vérifie l'absence de RPAREN avant de chercher le block 
-                                                               LPAREN RPAREN doit renvoyer UnitNode
-                                                               block() renverra NothingNode
+          LPAREN block? RPAREN                            =>   LPAREN RPAREN should return UnitNode
+                                                               LPAREN block RPAREN return self.block()
+                                                               Calling self.block when the code is LPAREN RPAREN would return NothingNode
         | sequence      -> (BEGIN)
         | command
+
+        Return a Block node
         """
         log("Code")
         if self.current_token.type == LPAREN:
@@ -200,13 +178,15 @@ class Parser:
         else:
             node = self.command()
         
-        # TODO: remove Block(node) to use only node
+        # NOTE: we could replace `Block(node)` by `node`
         return Block(node)
 
     def sequence(self):
         """
-        BEGIN END
+        BEGIN END                       => Return UnitNode
         BEGIN block (SEMI block)* END
+
+        Return UnitNode or a Sequence node
         """
         log("Sequence")
         self.eat(BEGIN)
@@ -237,21 +217,15 @@ class Parser:
         | IF block THEN block (ELSE block)?
         | PRINT_INT block
         | PRINT_STRING block
-        #TODO: REMOVE @LPARENRPAREN
-        #| LPAREN RPAREN                 => Permet des arguments UNIT (UnitNode) lors des appels de fonction
-        #                                   Car id cherche des codes et non des block (problème avec 1 + 1)
-        #                                   LPAREN block RPAREN *should* not happen
         | variable_statement ->(ID|EXCLAMATION)
         | nothing
 
-        DO NOT RETURN HIS OWN NODE
+        Does not return its own node
         """
         log("Command")
         if self.current_token.type in (INT, FLOAT, STRING):
             """INT | FLOAT | STRING"""
-            node = Num(self.current_token.value, self.current_token.type)
-            #print("NUM:", self.current_token.value, self.current_token.type)
-            #log("Command is eating a self type (should be a num):", self.current_token)
+            node = Literal(self.current_token.value, self.current_token.type)
             self.eat(self.current_token.type)
             return node
         elif self.current_token.type == LET:
@@ -264,7 +238,6 @@ class Parser:
             self.eat(DO)
             block_node = self.block()
             self.eat(DONE)
-            #log(f"Returning a Loop node boolean_node={boolean_node}, block_node={block_node}")
             return Loop(boolean_node, block_node)
         elif self.current_token.type == IF:
             """IF block THEN block (ELSE block)?"""
@@ -289,12 +262,6 @@ class Parser:
             """PRINT_STRING block"""
             self.eat(PRINT_STRING)
             return PrintString(self.block())
-        # TODO: Remove @LPARENRPAREN
-        #elif self.current_token.type == LPAREN:
-        #    print("Finding an UnitNode in code (LPAREN RPAREN), used to be able to use UNIT argument in function call (see comments). LPAREN block RPAREN *should* not happen")
-        #    self.eat(LPAREN)
-        #    self.eat(RPAREN)
-        #    return UnitNode()
         elif self.current_token.type == ID or self.current_token.type == EXCLAMATION:
             """variable_statement ->(ID|EXCLAMATION)"""
             return self.variable_statement()
@@ -307,9 +274,9 @@ class Parser:
     def assignment_statement(self):
         """
         LET assignment (AND assignment)* IN block
-        LET assignment (AND assignment)*                => TODO: to implement, for the moment we just use an IN UnitNode
+        LET assignment (AND assignment)*                => NOTE: for the moment we just use an UnitNode as the IN block
 
-        Return let_statement node
+        Return a let_statement node
         """
         log("Assignment_statement")
         self.eat(LET)
@@ -327,7 +294,6 @@ class Parser:
         else:
             """LET assignment (AND assignment)*"""
             # We use a UnitNode node to create an assignment_statement without "IN block" part
-            show(colors.WARNING, "WARNING: parser:assignment_statement global variable are not implemented, using a UnitNode", colors.ENDC)
             block = UnitNode()
         
         return AssignmentStatement(assignments_list, block)
@@ -366,7 +332,7 @@ class Parser:
                 if self.current_token.type == LPAREN:
                         """LPAREN RPAREN"""
                         self.eat(LPAREN)
-                        #TODO: Support couples
+                        # NOTE: couples and tuples are currently not supported
                         self.eat(RPAREN)
                         # It's an unit parameter
                         # We use the None parameter to represent an UNIT id
@@ -414,7 +380,7 @@ class Parser:
                     if self.current_token.type == LPAREN:
                         """LPAREN RPAREN"""
                         self.eat(LPAREN)
-                        #TODO: Support couples
+                        # NOTE: couples and tuples are currently not supported
                         self.eat(RPAREN)
                         # It's an unit parameter
                         # We use the None parameter to represent an UNIT id
@@ -431,7 +397,6 @@ class Parser:
                 # The types are not yet determined
                 parameters_types_list = [None] * len(parameters_list)
 
-                print("searching a function body")
                 function_body_node = self.block()
 
                 function_node = Function(parameters_list, parameters_types_list, function_body_node)
@@ -454,86 +419,12 @@ class Parser:
                 block_node = self.block()
                 return AssignmentVariable(var_name, is_ref, block_node)
 
-    """
-    # Alternative function déclaration grammar
-    def assignment(self):
-        ""#"
-        ID EQUALS function (-> FUNCTION)
-        ID EQUALS REF? block
-
-        Return assignment node
-        ""#"
-        log("Assignment")
-        var_name = self.current_token.value
-        self.eat(ID)
-
-        self.eat(EQUALS)
-
-        if self.current_token.type == FUNCTION:
-            # It's a function declaration
-            self.eat(FUNCTION)
-            # The function is represented by the Function class.
-            # let f = fun a b c -> block 
-            # will be stored as Function(a -> Function(b -> Function(c -> block)))
-            print("searching a function body")
-            content_node = self.function_body()
-            return AssignmentFunction(var_name, content_node)
-
-        else:
-            # It's not a function declaration
-            # It's then a variable declaration
-            if self.current_token.type == REF:
-                self.eat(REF)
-                is_ref = True
-            else:
-                is_ref = False
-        
-            block_node = self.block()
-            return AssignmentVariable(var_name, is_ref, block_node)        
-
-    def function_body(self):
-        ""#"
-        (LPAREN RPAREN)|ID) (ARROW block|function_body)
-
-        Return a function node.
-        This function allow to use recursion to create the nested Functions nodes
-        ""#"
-        
-        if self.current_token.type == LPAREN:
-            ""#"LPAREN RPAREN""#"
-            self.eat(LPAREN)
-            #TODO: Support couples
-            self.eat(RPAREN)
-            # It's an unit parameter
-            parameter_id = None
-        else:
-            ""#"ID""#"
-            parameter_id = self.current_token.value
-            self.eat(ID)
-        
-        if self.current_token.type == ARROW:
-            ""#"ARROW block""#"
-            self.eat(ARROW)
-            block_node = self.block()
-            return Function(parameter_id, block_node)
-
-        else:
-            ""#"function_body""#"
-            function_node = self.function_body()
-
-            return Function(parameter_id, function_node)
-    """
-
     def variable_statement(self):
         """
           EXCLAMATION ID
         | ID REASSIGN block
-        | ID (block != nothing)*        => Utilisé pour les appels de fonctions : 
-                                            Pas de block = variable
-                                            Au moins un block = appel d'une fonction (avec un argument)
-
-        # If there is no block then it's a variable
-        # Else it's a function call
+        | ID (block != nothing)*        => If there is no block, its a variable
+                                           else, it's a function call
         """
         log("Variable Statement")
 
@@ -565,22 +456,20 @@ class Parser:
             # if following_block is a block node we need to get the node it contains
             # because we need to check whether the content of the block node is or not a NothingClass
             if type(following_block).__name__ == "Block":
-                print("Opening block node in id check")
+                # We open the block
                 following_block_node_content = following_block.node
             else:
-                print("Not a block node in id check")
                 following_block_node_content = following_block
             
             while not type(following_block_node_content).__name__ == "NothingClass":
+                # Found a new id
                 arguments_nodes_list.append(following_block)
-                print(colors.FAIL, "CONTINUE FINDING BLOCK in id check (function or variable) ", type(following_block_node_content).__name__, colors.ENDC)
                 following_block = self.code()
 
                 if type(following_block).__name__ == "Block":
-                    print("Opening block node in id check (function or variable) OK")
+                    # We open the block
                     following_block_node_content = following_block.node
                 else:
-                    print("It was not a block node in id check (function or variable) OK")
                     following_block_node_content = following_block
             
             # We can now determine if the syntax was a function call or a variable access

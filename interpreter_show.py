@@ -68,8 +68,8 @@ class InterpreterShow(NodeVisitor):
         self.deind()
         self.print_ind('}')
 
-    def visit_Num(self, node):
-        self.print_ind('Num')
+    def visit_Literal(self, node):
+        self.print_ind('Literal')
         self.print_ind('{')
         self.ind()
         self.print_ind(node.value)

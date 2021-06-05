@@ -31,10 +31,7 @@ class Token:
         """
         Token(INTEGER, 3)
         """
-        return 'Token({type}, {value})'.format(
-            type=self.type,
-            value=repr(self.value)
-        )
+        return f'Token({self.type}, {self.value})'
 
     def __repr__(self):
         return self.__str__()
@@ -70,32 +67,19 @@ class Symbol(object):
     ----------
     id : string
         Non duplicated id used to find the symbol
-    isref : bool
-        Is the symbol mutable
-    value : VALUE (string, int...)
-        Value of the symbol
-    type : PREDEFINED TYPE
-        Type of symbol
     """
-    symbol_type = "Symbol" #TODO: remove
-    def __init__(self, id, isref, value, type):
+    symbol_type = "Symbol"
+    def __init__(self, id):
         self.symbol_type = "Symbol"
         self.id = id
-        #self.isref = isref
-        #self.value = value
-        #self.type = type
 
 class SymbolType(Symbol):
     """
     Represent a type
-    - builtin type
-    - composites type (int -> string) TODO :Really?
     """
     def __init__(self, id):
         self.symbol_type = "Type"
         self.id = id
-        #self.type = type
-        #TODO: remove type
     
     def get_symbol_type(self):
         """
@@ -114,37 +98,34 @@ class SymbolType(Symbol):
 class SymbolQuoteType(Symbol):
     """
     Represent a quote type ('a, 'b)
-    This class allow to use placeolder type 'a. They can or not be resolved ('a = int or 'a = None)
-    
-    TODO: Document
-    A comparison is managed by this class
-     - is equals
-     - resolve the unresolved quote type
-    TODO: Assumption: when a comparison is done we can fix the type
+    This type is used as a placeholder type which can be resolved.
 
-    # NOTE: Using the same id twice *should* not be a problem as the object created should be different
+    Comparison between type can be managed by this class
+     - If the type is already resolved, it calls a comparison with the resolved type
+     - If it is not resolved, the type becomes resolved and the comparison return True
+    We assume the comparison between two types is sufficient to determine types
+
+    The resolution usually happen in function definitions and calls
+
+    # NOTE: Using the same id twice *should* be a problem as we use id check to differentiate symboles
 
     Attributes
     ----------
     numeric_id : string
         Identifier for the quote symbole
-    resolved_type : SymbolType object
-        When we know what type should be a 'a object, we attribute it to resolved_type
-        This allow to do type determination for procedure parameters
+    resolved_type : SymbolType object, optional
+        The type that should be used to resolve this symbol
     
     Methods
     -------
     lock
         Lock the quote type to prevent it from being resolved.
-        A quote type should always be locked after it's use (ex: function definition)
+        A quote type should always be locked after it's use (ex: after a function definition)
     """
     def __init__(self, numeric_id, resolved_type=None):
         self.symbol_type = "QuoteType"
         self.numeric_id = numeric_id
         self.resolved_type = resolved_type
-
-        #TODO: remove
-        #self.id = ord(numeric_id)
 
         # If the symbole can be resolved
         # Can be changed with the self.lock() command
@@ -155,16 +136,18 @@ class SymbolQuoteType(Symbol):
         Prevent the unresolved quote type from being locked.
         Should for example be used after the defintion of the function, before its call
 
-        # WARNING
-        A quote type should always be locked after the end of its definition, before its usage
+        # WARNING: A quote type should always be locked after the end of its definition
         """
         self._locked = True
     
     def get_symbol_type(self):
         """
-        Return the quote object corresponding to the type
-        Used for function call
-        Will return a Type or an unresolved QuoteType
+        If the symbol is resolved, call and return get_symbol_type() on the resolved type
+        Else return itself
+
+        This method is used for function call
+
+        Always return a TypeSymbol or an unresolved SymbolQuoteType
         """
         if self.resolved_type is None:
             return self
@@ -173,30 +156,30 @@ class SymbolQuoteType(Symbol):
     
     def _generate_string_identifier(self):
         """
-        Return a string identifier associated with the symbole
-        Constructed of the format a b ... z aa bb ... zz aaa bbb ... zzz
+        Construct and return a string identifying the symbole (format: a b ... z aa bb ... zz aaa bbb ... zzz)
+        
+        This method is used to get a human readable representation of the type
         """
         return chr(ord('a') + self.numeric_id % 26) * (self.numeric_id // 26 + 1)
 
     def __eq__(self, other):
         """
-        Charge the equality operation
-        Allow to resolve unresolved quote type
+        Charge the equality operation to allow the class to resolve unresolved quote type
+         - If the type is already resolved, it calls a comparison with the resolved type
+         - If it is not resolved, the type becomes resolved and the comparison return True
         """
         if self.resolved_type is None:
             if self._locked:
                 # The quote type is locked
                 # An unresolved and locked type accept anything
-                print("Comparing unresolved locked", self, other)
+                warning("Comparing unresolved and locked type")
                 return True
             else:
                 # The type is unresolved but not locked
-                print("Comparing unresolved", self, other)
-                # We can now resolve the two elements
+                # We can resolve the two elements
                 self.resolved_type = other
                 return True
         else:
-            print("Comparing resolved", self, other)
             # The type is already resolved. We then need to compare the real type and the other type
             return self.resolved_type == other
     
@@ -225,9 +208,8 @@ class SymbolArrayVariable(Symbol):
         self.symbol_type = "ArrayVariable"
         self.id = id
         self.size = size
-        self.value = value          # An array?
-        self.type = type            # Correspond of the type of the content of the variable
-                                    # TODO: improve array_type Is it the type of the content or the type of 'a array?
+        self.value = value
+        self.type = type
     
     def __str__(self):
         return f"Variable {self.id}: isref={self.isref}; value={self.value}; type={self.type}"
@@ -244,8 +226,8 @@ class SymbolFunction(Symbol):
     
     def __str__(self):
         text = f"Function {self.id}: "
-        for param, ptype in zip(self.parameters_list, self.parameters_types_list):
-            text += f"{param}:{ptype} -> "
+        for parameter, parameter_type in zip(self.parameters_list, self.parameters_types_list):
+            text += f"{parameter}:{parameter_type} -> "
         text += str(self.result_type)
 
         return text
@@ -259,17 +241,17 @@ class MemoryTable(object):
     scope_name : string
     scope_level : int
     following_table : MemoryTable object
-        A memory table where symbole are already defined and where the table should look for unavailable requested symbols
+        A memory table which the class should use to get symbols unavailable in the current scope
     
     Methods
     -------
     define(id, symbol)
         Define a symbol in the memory
     get(id)
-        Return the symbol id defined in the table or in the following
-        Return None if id is not defined
+        Return the symbol named id
+        Return None if it is not defined
     isdefined(id, look_following_table=True)
-        Return if id is defined
+        If a symbol id is defined
     """
     def __init__(self, scope_name, scope_level, following_table):
         self.scope_name = scope_name
@@ -302,7 +284,7 @@ class MemoryTable(object):
         
     def isdefined(self, id, look_following_table=True):
         """
-        Return is the symbol id is already defined
+        If the symbol id is defined
 
         Attributes
         ----------
@@ -324,27 +306,24 @@ class MemoryTable(object):
                 return False
         
     def __str__(self):
-        text = "\n\n"
+        text = f"""
+Following table:
+----------------
 
-        text += "Following table:\n"
-        text += "----------------\n"
+{self.following_table.__str__()}
 
-        text += self.following_table.__str__()
+Memory Table
+============
+scope_name: {str(self.scope_name)}
+scope_level: {str(self.scope_level)}
 
-        text += "Memory Table\n"
-        text += "============\n"
-        text += "scope_name: " + str(self.scope_name) + '\n'
-        text += "scope_level: " + str(self.scope_level) + '\n'
-
-        text += "\n"
-        text += "Content:\n"
-        text += "--------\n"
-
+Content:
+--------
+"""
         for obj_id in self._memory.keys():
             text += str(obj_id) + ": " + str(self._memory[obj_id]) + "\n"
         
-
-        text += "\n============\n\n"
+        text += "============"
 
         return text
 

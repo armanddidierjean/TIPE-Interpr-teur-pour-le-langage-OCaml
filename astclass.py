@@ -2,7 +2,7 @@
 #     AST  Nodes    #
 #####################
 """
-File containing all class used to create the tree representing the program
+Class used to genrate the tree representing a program
 """
 
 class AST:
@@ -45,12 +45,9 @@ class Sequence(AST):
     def __init__(self, commands_list):
         self.commands_list = commands_list
 
-class Num(AST):
+class Literal(AST):
     """
-    Num node
-    Represent a predefined type value
-
-    TODO:accept strings and bool
+    Literal node
     
     Attributes
     ----------
@@ -144,8 +141,6 @@ class AssignmentFunction(AST):
         Content of a function, can be an other function or a block
     is_recursive : bool
         If the function should be recursive
-
-    TODO: rename the attributes
     """
     def __init__(self, var_name, content_node, is_recursive):
         self.var_name = var_name
@@ -181,18 +176,18 @@ class Variable(AST):
     def __init__(self, var_name, get_content):
         self.var_name = var_name
         self.get_content = get_content
-        #TODO: créer un AST node pour le point d'exclamation
+        # NOTE: use an AST node to represent the exclamation point in the get_next_content
 
 class FunctionCall(AST):
     """
     FunctionCall node
-    It does not represent the function but its result. To access a function symbol, use a variable class.
+    Does not represent the function but the result of the call. To access a function symbol we need to use a variable class.
     
     Attributes
     ----------
     var_name : string
         Name of the called function
-    parameters_nodes_list : [AST]
+    parameters_nodes_list : [AST node]
         List countaining AST nodes of actual parameters or arguments
     """
     def __init__(self, var_name, arguments_nodes_list):
@@ -203,7 +198,7 @@ class PrintInt(AST):
     """
     PrintInt node
 
-    TODO: create a global Print node with a type arg
+    NOTE: we could create a global Print node with a type arg
 
     Attributes
     ----------
@@ -217,7 +212,7 @@ class PrintString(AST):
     """
     PrintInt node
 
-    TODO: create a global Print node with a type arg
+    NOTE: we could create a global Print node with a type arg
 
     Attributes
     ----------
@@ -264,13 +259,12 @@ class ConditionalStatement(AST):
 class UnitNode(AST):
     """
     UnitNode node
-    Allow to have non executed node (usually return None of type UNIT)
+    Represent a non executed node (usually return None of type UNIT)
     """
     pass
 
 class NothingClass(AST):
     """
-    Used to detect empty blocks
     Tool class: It does not represent OCaml code but is used by the interpreter to detect empty block
     """
     pass
@@ -283,19 +277,13 @@ class Function(AST):
     ----------
     parameter_id : string or None
         Name of the parameter
-        Can be none if the parameter is unit
+        None represent an unit parameter
     content_node : AST node
         Body of the function, can be an other function or a block node
-    TODO: change
 
-    WARNING THERE IS NO VISIT FUNCTION METHOD ???
+    There is no visit_Function method
     """
     def __init__(self, parameters_list, parameters_types_list, function_body_node):
         self.parameters_list = parameters_list
         self.parameters_types_list = parameters_types_list
         self.function_body_node = function_body_node
-    """
-    def __init__(self, parameter_id, content_node):
-        self.parameter_id = parameter_id
-        self.content_node = content_node
-    """

@@ -24,15 +24,6 @@ class InterpreterValue(NodeVisitor):
         
         # Base memory table, countain builtin types
         self.memory_table = MemoryTable("Main", 0, None)
-        
-        #TODO: Is it useful to init base types?
-        #self._init_base_types()
-    
-    # TODO: Is it useful to init base types?
-    #def _init_base_types(self):
-    #    print("Initing base type")
-    #    for symbol in BUILTIN_TYPES:
-    #        self.memory_table.define(symbol.id, symbol)
     
     def interpret(self):
         return self.visit(self.AST_node)
@@ -59,14 +50,15 @@ class InterpreterValue(NodeVisitor):
     
     def visit_Sequence(self, node):
         log("Visiting Sequence")
+        # We need to execute all comands contained in the sequence
         for command_node in node.commands_list[:-1]:
             # The result of these nodes is not used
             # InterpreterType will return a warning if their type is not unit
             self.visit(command_node)
         return self.visit(node.commands_list[-1])
 
-    def visit_Num(self, node):
-        log("Visiting Num")
+    def visit_Literal(self, node):
+        log("Visiting Literal")
         return node.value
     
     def visit_BinOp(self, node):
@@ -82,7 +74,7 @@ class InterpreterValue(NodeVisitor):
             return self.visit(node.left_node) / self.visit(node.right_node)
 
         # Boolean operation
-        #TODO: check the type of elements: an equality between list should be an equality between it's content
+        # NOTE: the content type of container elements is not checked (list, tuples)
         if node.op_token.type == EQUALS:
             return self.visit(node.left_node) == self.visit(node.right_node)
         if node.op_token.type == DIFFERENT:
@@ -109,11 +101,12 @@ class InterpreterValue(NodeVisitor):
         create_a_new_memory_table = type(node).__name__ != "UnitNode"
         
         if create_a_new_memory_table:
-            print("Not an unit node : new memory table ")
+            # Not an unit node : new memory table
             mt = MemoryTable("Assignement scope", self.memory_table.scope_level + 1, self.memory_table)
             self.memory_table = mt
         else:
-            print("Unit node : Define var in the current level")
+            # Unit node : Define var in the current level
+            pass
         
         for assignment_node in node.assignments_list:
             self.visit(assignment_node)
@@ -126,7 +119,7 @@ class InterpreterValue(NodeVisitor):
         
         return result
     
-    # WARNING: the following methods need some improvements
+    # WARNING: the following methods may be improved
 
     def visit_AssignmentVariable(self, node):
         log("Visiting AssignmentVariable")
@@ -137,18 +130,6 @@ class InterpreterValue(NodeVisitor):
         
         self.memory_table.define(node.var_name, symbol)
         show(colors.YELLOW, f"Assigning Variable: {node.var_name} with type {symbol.type}, isref = {symbol.isref}", colors.ENDC)
-
-    """ TODO: remove
-    def visit_AssignmentFunction(self, node):
-        log("Visiting AssignmentFunction")
-
-        # We don't need to check if the statement is correct as it was done before by the InterpreterType
-        symbol = SymbolFunction(node.var_name, node.is_ref, value=self.visit(node.value_node), type=None)
-        # the type is None as we don't use types in InterpreterValue
-        
-        self.memory_table.define(node.var_name, symbol)
-        show(colors.YELLOW, f"Assigning Variable: {node.var_name} with type {symbol.type}, isref = {symbol.isref}", colors.ENDC)
-    """
 
     def visit_AssignmentFunction(self, node):
         log("Visiting AssignmentFunction")

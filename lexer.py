@@ -6,7 +6,7 @@ from keywords import *
 #####################
 class Lexer:
     """
-    Lexer: an OCaml Lexer
+    OCaml Lexer
 
     Parameters
     ----------
@@ -17,13 +17,13 @@ class Lexer:
     -------
     get_next_token()
         return the next token found in text
-        return EOF when all tokens have been lexed
+        return EOF when all the text have been lexed
     """
 
     # WARNING
     # All eating methods using while loop to find a specific character
     # should **always** check `self.current_char is not None`
-    # or an infinit loop may happen. 
+    # to prevent an infinit loop may happen. 
     # OCaml example: `let a = 'text;;`
 
     def __init__(self, text):
@@ -40,7 +40,7 @@ class Lexer:
 
     def advance(self, nb=1):
         """
-        Get next charactere from text:
+        Update the current charactere:
          - modify self.current_pos
          - modify self.current_char
 
@@ -61,7 +61,7 @@ class Lexer:
     def peek(self, nb=1):
         """
         Return the nb next characters from text
-        If there is no next characters, return None
+        If there is no next character return None
 
         Parameters
         ----------
@@ -77,13 +77,13 @@ class Lexer:
     
     def isEnd(self):
         """
-        Return true if the end of the code is not attained
+        Return true if the end of text is attained
         """
         return self.current_char is None
 
     def isNotEnd(self):
         """
-        Return true when the code while the end of the code is not attained
+        Return not isEnd()
         """
         return not self.isEnd()
 
@@ -92,7 +92,7 @@ class Lexer:
         Return an id: an alphanumeric string forming a word
         Accepted characters:
             a-z, A-Z, 1-9, _
-        The function get_next_token will check the first character is a-Z, A-Z before calling this one.
+        The function get_next_token will check the first character is a-Z, A-Z before calling this the method.
         """
         result = ''
         while self.isNotEnd() and (self.current_char.isalnum() or self.current_char == '_'):
@@ -125,8 +125,8 @@ class Lexer:
     
     def get_string_token(self):
         """
-        Return a string
-        Support various string delimitation and character escape
+        Return a string: a text delimited by two quotes or double quotes
+        Support character escapement
         """
         # The delimiter can be a simple quote ' or a double quote "
         delimiter = self.current_char
@@ -140,8 +140,8 @@ class Lexer:
         result = ''
         # We are expecting a second delimiter so we can suppose the string wont be finished before we found it
         while self.isNotEnd() and self.current_char != delimiter:
-            # TODO: does that works for `\n`? we would want to keep them 
-            # Escaped character: \" \n...
+            # NOTE: currently \n and \t are not preserved
+            # Escaped character: \" \' ...
             if self.current_char == '\\':
                 # We just pass the backslash
                 # then add the char even if it's the delimiter
@@ -161,9 +161,8 @@ class Lexer:
     def pass_comment(self):
         """
         Advance in the text while the current char is inside a comment
+        Nested comments are required to be each closed
         """
-        # Require nested comment to be each closed
-
         # Pass the '(*'
         self.advance(2)
         while self.isNotEnd() and self.peek(2) != '*)':
@@ -182,8 +181,7 @@ class Lexer:
     def get_next_token(self):
         """
         Parse and return the next token found in text
-        
-        return EOF when all tokens have been parsed
+        Return EOF when all tokens have been parsed
 
         Raises
         ------
@@ -194,13 +192,14 @@ class Lexer:
         current_pos = self.current_pos
 
         if current_char is None:
-            return Token(EOF, None, -1, -1) # TODO: use None instead of -1 ?
+            return Token(EOF, None, -1, -1) # NOTE: we could use None instead of -1
 
+        # Skip whitespace, new lines and tabs
         if self.current_char == ' ' or self.current_char == '\n' or self.current_char == '\t':
-            # skip whitespace or new lines and tabs
             self.advance()
             return self.get_next_token()
 
+        # Skip comments
         if self.peek(2) == '(*':
             self.pass_comment()
             return self.get_next_token()
@@ -213,16 +212,16 @@ class Lexer:
         if self.current_char in ('"', "'"):
             return self.get_string_token()
 
-        ############### ID ###############
+        ########### ID or KEYWORDS ###########
         if self.current_char.isalpha() and self.current_char.islower():
             name = self.get_id()
-            length = len(name)      # Length of the code
+            length = len(name)              # Length of the code
             if name in RESERVED_KEYWORDS:
                 return Token(RESERVED_KEYWORDS[name], None, current_pos, len(name))
             else:
                 return Token(ID, name, current_pos, length)
 
-        ############### Two characters ###############
+        ########### Two characters ###########
         if self.peek(2) == '->':
             self.advance(2)
             return Token(ARROW, '->', current_pos, 2)

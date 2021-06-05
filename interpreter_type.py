@@ -10,7 +10,6 @@ class InterpreterType(NodeVisitor):
     OCaml InterpreterType
 
     Determine the type of the AST node
-    WARNING: this class is functional but still a WIP
 
     Methods
     -------
@@ -73,8 +72,8 @@ class InterpreterType(NodeVisitor):
         # The type of a sequence is the type of its last element
         return self.visit(node.commands_list[-1])
 
-    def visit_Num(self, node):
-        log("Visiting Num")
+    def visit_Literal(self, node):
+        log("Visiting Literal")
         # Can be INT, FLOAT, STRING
         # node.type is set by the Lexer and countain a string like INT. We need to convert it to a symbol
         return BUILTIN_TYPES[node.type.lower()]
@@ -100,7 +99,7 @@ class InterpreterType(NodeVisitor):
                 error(f"Left node {node.left_node} is of type {left_type} and right node {node.right_node} of type {right_type} which are not the same in Boolean Binary Operation {node.op_token.type}")
             return BUILTIN_TYPES["bool"]
         
-        warning("Undefined operation BinOp", node.op_token.type)
+        error("Undefined operation BinOp", node.op_token.type)
         return BUILTIN_TYPES["unit"]
 
     def visit_UnaryOp(self, node):
@@ -110,7 +109,7 @@ class InterpreterType(NodeVisitor):
             if type != BUILTIN_TYPES["int"]:
                 error(f"Unary node {node.right_node} is of type {type} instead of INTEGER in Unary Operation {node.op_token.type}")
             return BUILTIN_TYPES["int"]
-        warning("Undefined operation UnaryOp")
+        error("Undefined operation UnaryOp")
         return BUILTIN_TYPES["unit"]
     
     def visit_AssignmentStatement(self, node):
@@ -127,16 +126,16 @@ class InterpreterType(NodeVisitor):
         create_a_new_memory_table = type(node).__name__ != "UnitNode"
         
         if create_a_new_memory_table:
-            print("Not an unit node : new memory table ")
+            # Not an unit node : create new memory table
             mt = MemoryTable("Assignement scope", self.memory_table.scope_level + 1, self.memory_table)
             self.memory_table = mt
         else:
-            print("Unit node : Define var in the current level")
+            # Unit node : Define var in the current level
+            pass
         
         for assignment_node in node.assignments_list:
             assignement_type = self.visit(assignment_node)
             # The type of the assignments should be unit
-            #TODO: is this really useful?
             if assignement_type != BUILTIN_TYPES["unit"]:
                 warning(f"{assignment_node} is of type {type} instead of unit in assignment statement")
         
@@ -146,7 +145,7 @@ class InterpreterType(NodeVisitor):
             # After evaluating the block, we need to remove the corresponding memory table
             self.memory_table = self.memory_table.following_table
         
-        #TODO: remove memory_table print
+        # TODO: remove the memory_table print
         print(self.memory_table)
 
         return result_type
@@ -246,18 +245,11 @@ class InterpreterType(NodeVisitor):
                 parameters_types_list.append(parameter_type)
                 # The list parameters_types_list countain the respectives types of parameters_list
 
-            #TODO:REMOVE
-            print("Determining function declaration parameters")
-            print(self.memory_table)
-
             # 4 We remove the memory table and define the function symbol
             self.memory_table = self.memory_table.following_table
             
             function_symbol = SymbolFunction(function_id, parameters_list, parameters_types_list, function_node.function_body_node, result_type, is_recursive=node.is_recursive)
             self.memory_table.define(function_id, function_symbol)
-
-            print("Defining function")
-            print(self.memory_table)
             
             show(colors.YELLOW, f"Assigning function: {function_id} with parameters: {list(zip(parameters_list, parameters_types_list))} result type {result_type} and function_body_node:{function_node.function_body_node}", colors.ENDC)
             # An assignement is of type UNIT
@@ -272,9 +264,6 @@ class InterpreterType(NodeVisitor):
             # We can now lock used quote symboles object
             for quote_symbole in used_quote_symbol_objects:
                 quote_symbole.lock()
-            
-            print("function_object_type", function_object_type)
-
 
             return BUILTIN_TYPES["unit"]
         else:

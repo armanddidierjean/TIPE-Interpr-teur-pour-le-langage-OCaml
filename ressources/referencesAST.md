@@ -26,9 +26,9 @@ code:       LPAREN RPAREN                                       -> Block(UnitNod
 sequence:   BEGIN END                                           -> UnitNode()
             BEGIN block (SEMI block)* END                       -> Sequence([`block`])
 
-command:    INT                                                 -> Num(value, type)
-            FLOAT                                               -> Num(value, type)
-            STRING                                              -> Num(value, type)             `BIZARRE` rename Num
+command:    INT                                                 -> Literal(value, type)
+            FLOAT                                               -> Literal(value, type)
+            STRING                                              -> Literal(value, type)
             assignment_statement       ->(LET)                  -> `assignment_statement`
             WHILE block DO block DONE                           -> Loop(boolean_node=`block`, block_node=`block`)
             IF block THEN block                                 -> ConditionalStatement(condition_node=`block`,

@@ -53,7 +53,7 @@ Difference entre UnitNode and NothingNode. None is also used in function paramet
 
 L'AST node Block est inutile et peut dans la majorité des cas être éliminée
 
-Rename l'AST node Num() car elle supporte des STRING and FLOAT, INT
+~~Rename l'AST node Num() car elle supporte des STRING and FLOAT, INT~~ Elle s'appelle maintenant : `Literal`
 
 Use only one AST for PrintInt and PrintString with a type?
 
