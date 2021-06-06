@@ -273,7 +273,7 @@ class Parser:
     def assignment_statement(self):
         """
         LET assignment (AND assignment)* IN block
-        LET assignment (AND assignment)*                => NOTE: for the moment we just use an UnitNode as the IN block
+        LET assignment (AND assignment)*                => NOTE: currently UnitNode is used as the IN block
 
         Return a AssignmentStatement node
         """
