@@ -5,6 +5,9 @@
 > Violet : connaissances générales
 > Vert : propre à ce projet
 
+**M Dumas**
+Donal Knuth, Algorithm
+
 **Ressources list**
 https://github.com/sdmg15/Best-websites-a-programmer-should-visit#building-a-simple-compilerinterpreter
 
