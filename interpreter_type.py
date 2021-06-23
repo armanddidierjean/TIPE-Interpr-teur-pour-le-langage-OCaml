@@ -161,7 +161,7 @@ class InterpreterType(NodeVisitor):
             # An assignement is of type UNIT
             return BUILTIN_TYPES["unit"]
         else:
-            errorsManager.SyntaxError(f"Memory error: {node.var_name} is already defined in the current memory table")
+            errorsManager.MemoryError(f"{node.var_name} is already defined in the current memory table")
     
     def visit_AssignmentFunction(self, node):
         log("Visiting AssignmentFunction")
@@ -180,7 +180,7 @@ class InterpreterType(NodeVisitor):
 
             parameters_list = function_node.parameters_list
 
-            # 2 We create a new memory table for the function body, it will be used to determine parameters type
+            # 2 Create a new memory table for the function body, it is used to determine parameters type
             mt = MemoryTable(function_id, self.memory_table.scope_level + 1, self.memory_table)
             
             # List of currently quote types passed for the recursive definition of the function
@@ -266,7 +266,7 @@ class InterpreterType(NodeVisitor):
 
             return BUILTIN_TYPES["unit"]
         else:
-            errorsManager.SyntaxError(f"Memory error: {node.var_name} is already defined in the current memory table")
+            errorsManager.MemoryError(f"{node.var_name} is already defined in the current memory table")
 
     def visit_Reassignment(self, node):
         log("Visiting Reassignment")
@@ -283,9 +283,9 @@ class InterpreterType(NodeVisitor):
                     # A reassignement is of type UNIT
                     return BUILTIN_TYPES["unit"]
                 else:
-                    errorsManager.SyntaxError(f"Memory error: {node.var_name} is not mutable")
+                    errorsManager.MemoryError(f"{node.var_name} is not mutable")
         else:
-            errorsManager.SyntaxError(f"Memory error: {node.var_name} is not defined")
+            errorsManager.MemoryError(f"{node.var_name} is not defined")
         
     def visit_Variable(self, node):
         log("Visiting Variable")
@@ -365,7 +365,7 @@ class InterpreterType(NodeVisitor):
                     self.quote_index += 1
                     # self.quote_index contain the index of the next to use quote numeric_identifier
 
-                    #We store this type is the dictionnary and use it
+                    # We store this type is the dictionnary and use it
                     quote_type_correspondance[expected_parameter_type.numeric_id] = quote_symbol
                     expected_parameter_type = quote_symbol
 
